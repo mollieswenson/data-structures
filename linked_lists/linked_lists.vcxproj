@@ -151,14 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="linked_list_v2.h" />
+    <ClInclude Include="linked_list.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="linked_lists.cpp" />
-    <ClCompile Include="linked_list_class.cpp" />
-    <ClCompile Include="linked_list_class_2.cpp" />
-    <ClCompile Include="linked_list_v2.cpp" />
+    <ClCompile Include="linked_list.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

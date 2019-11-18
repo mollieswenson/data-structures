@@ -1,4 +1,4 @@
-﻿  linked_list_v2.cpp
-c:\users\mswenson\desktop\repos\scratch\linked_lists\linked_list_v2.cpp(94): warning C4715: 'LinkedList::SetHead': not all control paths return a value
-c:\users\mswenson\desktop\repos\scratch\linked_lists\linked_list_v2.cpp(124): warning C4715: 'LinkedList::SetTail': not all control paths return a value
+﻿  linked_list.cpp
+c:\users\mswenson\desktop\repos\scratch\linked_lists\linked_list.cpp(93): warning C4715: 'LinkedList::SetHead': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\linked_lists\linked_list.cpp(123): warning C4715: 'LinkedList::SetTail': not all control paths return a value
   linked_lists.vcxproj -> C:\Users\mswenson\Desktop\repos\scratch\x64\Debug\linked_lists.exe
