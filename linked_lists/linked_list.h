@@ -1,4 +1,5 @@
 #pragma once
+#include <vld.h>
 
 struct Data
 {
@@ -35,14 +36,14 @@ public:
     LinkedList();
     ~LinkedList();
 
-    int GetLength() const; // returns current length of the list 
+    int GetLength() const; // returns current length of the list
 
     Node* GetHead() const;// returns pointer to first node
     Node* GetTail() const; // returns pointer to last node
 
     bool InList(Node*) const; // returns true if n is in the list
 
-    Node* SetHead(Node* n);      // Sets head to n and returns pointer to new head
+    Node* SetHead(Node* n);  // Sets head to n and returns pointer to new head
     Node* SetTail(Node* n);  // Sets tail to n and returns pointer to new tail
 
     Node* GetNode(int) const; // Returns node at index i

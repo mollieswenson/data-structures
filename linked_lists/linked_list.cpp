@@ -2,6 +2,7 @@
 #include<iostream>
 #include "linked_list.h"
 #include <assert.h>
+#include <vld.h>
 
 LinkedList::LinkedList()
     : head(nullptr), tail(nullptr), length(0) { }

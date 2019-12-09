@@ -2,8 +2,9 @@
 #include<iostream>
 #include "linked_list.h"
 #include <assert.h>
+#include <vld.h>
 
-int main()
+int mainX()
 {
 
     LinkedList list;
