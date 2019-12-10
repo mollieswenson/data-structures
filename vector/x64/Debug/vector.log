@@ -1,126 +1,23 @@
-﻿  vector.cpp
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(127): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(123): note: while compiling class template member function 'Vector<char>::Vector(const Vector<char> &)'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(357): note: see reference to function template instantiation 'Vector<char>::Vector(const Vector<char> &)' being compiled
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(322): note: see reference to class template instantiation 'Vector<char>' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(43): note: while compiling class template member function 'size_t Vector<int>::calc_cap(int)'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(93): note: see reference to function template instantiation 'size_t Vector<int>::calc_cap(int)' being compiled
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(331): note: see reference to class template instantiation 'Vector<int>' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(162): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(161): note: while compiling class template member function 'T &Vector<T>::at(const size_t) const'
-          with
-          [
-              T=char
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(131): note: see reference to function template instantiation 'T &Vector<T>::at(const size_t) const' being compiled
-          with
-          [
-              T=char
-          ]
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(65): note: while compiling class template member function 'void Vector<int>::manage_capacity(void)'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(267): note: see reference to function template instantiation 'void Vector<int>::manage_capacity(void)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(73): warning C4804: '<': unsafe use of type 'bool' in operation
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(72): note: while compiling class template member function 'bool Vector<char>::verify_exists(const int) const'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(162): note: see reference to function template instantiation 'bool Vector<char>::verify_exists(const int) const' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(52): note: while compiling class template member function 'void Vector<int>::reallocate(int)'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(68): note: see reference to function template instantiation 'void Vector<int>::reallocate(int)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(290): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(289): note: while compiling class template member function 'void Vector<double>::swap(size_t,size_t)'
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(75): note: see reference to function template instantiation 'void Vector<double>::swap(size_t,size_t)' being compiled
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(349): note: see reference to class template instantiation 'Vector<double>' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(256): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(255): note: while compiling class template member function 'void Vector<double>::erase(const size_t)'
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(65): note: see reference to function template instantiation 'void Vector<double>::erase(const size_t)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(245): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(244): note: while compiling class template member function 'void Vector<double>::erase(const size_t,const size_t)'
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(70): note: see reference to function template instantiation 'void Vector<double>::erase(const size_t,const size_t)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(220): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(219): note: while compiling class template member function 'void Vector<double>::insert(const size_t,const T)'
-          with
-          [
-              T=double
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(60): note: see reference to function template instantiation 'void Vector<double>::insert(const size_t,const T)' being compiled
-          with
-          [
-              T=double
-          ]
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(206): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(205): note: while compiling class template member function 'void Vector<double>::shrink_to_fit(void)'
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(141): note: see reference to function template instantiation 'void Vector<double>::shrink_to_fit(void)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(207): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(184): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(183): note: while compiling class template member function 'T &Vector<T>::back(void) const'
-          with
-          [
-              T=double
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(159): note: see reference to function template instantiation 'T &Vector<T>::back(void) const' being compiled
-          with
-          [
-              T=double
-          ]
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(150): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(148): note: while compiling class template member function 'void Vector<double>::assign(const int,const T &)'
-          with
-          [
-              T=double
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(80): note: see reference to function template instantiation 'void Vector<double>::assign(const int,const T &)' being compiled
-          with
-          [
-              T=double
-          ]
-c:\users\mswenson\desktop\repos\scratch\vector\tests.h(15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=char
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(31): note: see reference to function template instantiation 'T value<T>(T)' being compiled
-          with
-          [
-              T=char
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(325): note: see reference to function template instantiation 'void testModifiers<char>(Vector<char> &)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\tests.h(15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=int
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(31): note: see reference to function template instantiation 'T value<T>(T)' being compiled
-          with
-          [
-              T=int
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(334): note: see reference to function template instantiation 'void testModifiers<int>(Vector<int> &)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\tests.h(15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=size_t
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(31): note: see reference to function template instantiation 'T value<T>(T)' being compiled
-          with
-          [
-              T=size_t
-          ]
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(343): note: see reference to function template instantiation 'void testModifiers<size_t>(Vector<size_t> &)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(166): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(179): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(188): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(166): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(179): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(188): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(179): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(188): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(166): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(179): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(188): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(166): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(78): warning C4715: 'Vector<char>::verify_exists': not all control paths return a value
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(78): warning C4715: 'Vector<int>::verify_exists': not all control paths return a value
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(78): warning C4715: 'Vector<unsigned __int64>::verify_exists': not all control paths return a value
-c:\users\mswenson\desktop\repos\scratch\vector\vector.cpp(78): warning C4715: 'Vector<double>::verify_exists': not all control paths return a value
+﻿  main.cpp
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(115): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(114): note: while compiling class template member function 'size_t Vector<int>::calc_cap(size_t)'
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(201): note: see reference to function template instantiation 'size_t Vector<int>::calc_cap(size_t)' being compiled
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(200): note: while compiling class template member function 'Vector<int>::Vector(const Vector<int> &)'
+  c:\users\mswenson\desktop\repos\scratch\vector\main.cpp(18): note: see reference to function template instantiation 'Vector<int>::Vector(const Vector<int> &)' being compiled
+  c:\users\mswenson\desktop\repos\scratch\vector\main.cpp(16): note: see reference to class template instantiation 'Vector<int>' being compiled
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(147): warning C4804: '<': unsafe use of type 'bool' in operation
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(146): note: while compiling class template member function 'bool Vector<int>::verify_exists(const size_t) const'
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(223): note: see reference to function template instantiation 'bool Vector<int>::verify_exists(const size_t) const' being compiled
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(114): note: while compiling class template member function 'size_t Vector<int>::calc_cap(size_t)'
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(201): note: see reference to function template instantiation 'size_t Vector<int>::calc_cap(size_t)' being compiled
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(227): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(227): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(227): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(239): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(249): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(239): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(249): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(152): warning C4715: 'Vector<int>::verify_exists': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(152): warning C4715: 'Vector<double>::verify_exists': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(152): warning C4715: 'Vector<char>::verify_exists': not all control paths return a value
   vector.vcxproj -> C:\Users\mswenson\Desktop\repos\scratch\x64\Debug\vector.exe

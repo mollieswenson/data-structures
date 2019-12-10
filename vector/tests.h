@@ -1,26 +1,33 @@
 #pragma once
-#include <typeinfo>
 
-template <typename T> class Vector;
+
+#include <typeinfo>
+#include <vld.h>
+#include "vector.h"
+
+template <typename T>
+class Vector;
+
 struct myCustomType;
 
 template <typename T> void display(Vector<T>& vect) { std::cout << "\n   current " << vect << " " << vect.size() << "/" << vect.capacity() << "\n"; }
 void spacer() { std::cout << "\n   "; }
 
+
+// for testing various types... 
+template <typename T>T value(T type) { return type; }
+
+template <> int value<int>(int i) { return 0; }
+template <> double value(double i) { return 0.00; }
+template <> long value(long i) { return 1000; }
+
+template <> char value(char i) { return 'a'; }
+template <> std::string value(std::string i) { return "abc"; }
+
+
+// test modifier (T must support operator++)
 template <typename T>
-T value(T type)
-{
-    if (typeid(T) == typeid(char)) { return 'a'; }
-    if (typeid(T) == typeid(int) || typeid(T) == typeid(size_t)) { return 0; }
-    if (typeid(T) == typeid(double)) { return 1.1; }       // is there a way to find out if any type has a ++ and << operators? 
-
-    return type;
-}
-
-
-
-template <typename T>
-void testModifiers(Vector<T>& vect) // test modifier; elem type must support operator++
+void testModifiers(Vector<T>& vect) 
 {
     std::cout << "\n\nMODIFIERS";
 
@@ -97,12 +104,12 @@ void testModifiers(Vector<T>& vect) // test modifier; elem type must support ope
     }
 
     display(vect);
-
-
 }
 
+
+// test capacity; elem must support operator++
 template <typename T>
-void testCapacity(Vector<T>& vect)   // test capacity; elem must support operator++
+void testCapacity(Vector<T>& vect)   
 {
     std::cout << "\n\nCAPACITY";
     T test{};
@@ -143,8 +150,10 @@ void testCapacity(Vector<T>& vect)   // test capacity; elem must support operato
     display(vect);
 }
 
+
+// test access; must handle exceptions 
 template <typename T>
-void testAccess(T& vect) // test access; must handle exceptions 
+void testAccess(Vector<T>& vect) 
 {
     std::cout << "\n\nACCESS";
     size_t tests{2};
@@ -165,7 +174,7 @@ void testAccess(T& vect) // test access; must handle exceptions
         
     for (size_t i = 0; i < tests; i++)
     {
-        std::cout << "\n   [" << i << "] ";  std::cout << vect[i];
+        std::cout << "\n   [" << i << "] ";  std::cout << vect.at(i);
     }
         
     std::cout << "\n   data() " << vect.data();
