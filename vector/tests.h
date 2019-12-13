@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <typeinfo>
 #include <vld.h>
 #include "vector.h"
@@ -10,9 +9,8 @@ class Vector;
 
 struct myCustomType;
 
-template <typename T> void display(Vector<T>& vect) { std::cout << "\n   current " << vect << " " << vect.size() << "/" << vect.capacity() << "\n"; }
+template <typename T> void display(const Vector<T>& vect) { std::cout << "\n   current " << vect << " " << vect.size() << "/" << vect.capacity() << "\n"; }
 void spacer() { std::cout << "\n   "; }
-
 
 // for testing various types... 
 template <typename T>T value(T type) { return type; }
@@ -22,14 +20,12 @@ template <> double value(double i) { return 0.00; }
 template <> long value(long i) { return 1000; }
 
 template <> char value(char i) { return 'a'; }
-template <> std::string value(std::string i) { return "abc"; }
-
 
 // test modifier (T must support operator++)
 template <typename T>
 void testModifiers(Vector<T>& vect) 
 {
-    std::cout << "\n\nMODIFIERS";
+    std::cout << "\n\nMODIFIERS: " << typeid(T).name();
 
     vect.clear();
     display(vect);
@@ -106,23 +102,17 @@ void testModifiers(Vector<T>& vect)
     display(vect);
 }
 
-
-// test capacity; elem must support operator++
+// test capacity
 template <typename T>
 void testCapacity(Vector<T>& vect)   
 {
-    std::cout << "\n\nCAPACITY";
-    T test{};
-    test = value(test);
+    std::cout << "\n\nCAPACITY: " << typeid(T).name();
     size_t temp;
 
     vect.clear();
    
     for (size_t i = 0; i < 5; i++)
-    {
-        vect.push_back(test);
-        test++;
-    }
+        vect.push_back(T());
 
     display(vect);
 
@@ -130,10 +120,7 @@ void testCapacity(Vector<T>& vect)
 
     temp = vect.capacity() * 4;
     for (size_t i = 0; i < temp; i++) // increase cap
-    {
-        vect.push_back(test);
-        test++;
-    }
+        vect.push_back(T());
         
     display(vect);
 
@@ -150,13 +137,11 @@ void testCapacity(Vector<T>& vect)
     display(vect);
 }
 
-
-// test access; must handle exceptions 
+// test access
 template <typename T>
-void testAccess(Vector<T>& vect) 
+void testAccess(Vector<T>& vect)  // nothing should not be allowed on empty vector
 {
-    std::cout << "\n\nACCESS";
-    size_t tests{2};
+    std::cout << "\n\nACCESS: " << typeid(T).name();
 
     display(vect);
 
@@ -167,33 +152,31 @@ void testAccess(Vector<T>& vect)
     std::cout << "\n   front() "; std::cout << vect.front();
     std::cout << "\n   back() "; std::cout << vect.back();
 
-    for (size_t i = 0; i < tests; i++)
-    {
-        std::cout << "\n   at(" << i << ") "; std::cout << vect.at(i);
-    }
+    for (size_t i = 0; i < 1; i++)
+        std::cout << "\n   at(" << i << ") " << vect.at(i);
         
-    for (size_t i = 0; i < tests; i++)
-    {
-        std::cout << "\n   [" << i << "] ";  std::cout << vect.at(i);
-    }
-        
-    std::cout << "\n   data() " << vect.data();
+    for (size_t i = 0; i < 1; i++)
+        std::cout << "\n   [" << i << "] " << vect.at(i);
+
+    if ((vect.data()) != nullptr)
+        std::cout << "\n   data() " << vect.data();
+    else    
+    std::cout << "\n   data() nullptr";
 
     std::cout << "\n   at(size) "; std::cout << vect.at(vect.size());
     std::cout << "\n   at(size + 1) "; std::cout << vect.at(vect.size() + 1);
     std::cout << "\n   at(1000) "; std::cout << vect.at(1000);
 
-    display(vect);
-}
+    std::cout << "\n   begin() "; std::cout << *vect.begin();
+    std::cout << "\n   end() "; std::cout << *vect.end(); 
 
+    //it<T> it = vect.begin(); // why can't i do this here? 
+    //std::cout << "\n   it: "; std::cout << *it; it++;
+    //std::cout << "\n   it++: "; std::cout << *it; it++;
+    //std::cout << "\n   it++: "; std::cout << *it; it++;
+    //std::cout << "\n   it++: "; std::cout << *it; it++;
+    //std::cout << "\n   it++: "; std::cout << *it; it++;
+    //std::cout << "\n   it++: "; std::cout << *it; it++;
 
-template <typename T>
-void testMemberVals(const Vector<T>& vect)   // print member vals
-{
-    std::cout << "\n\nMEMBERS";
-    std::cout << "\n   empty() = " << vect.empty();
-    std::cout << "\n   size() = " << vect.size();
-    std::cout << "\n   capacity() = " << vect.capacity();
-
-    std::cout << "\n   result " << vect;
+    //display(vect);
 }

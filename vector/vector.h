@@ -13,7 +13,30 @@
 
 
 // implement the std::vector-like class with dynamic array: https://en.cppreference.com/w/cpp/container/vector
-// did not include allocators or iterators.. don't know enough 
+// also looking at blz/vector.h https://ghosthub.corp.blizzard.net/blizzard/blz/blob/master/include/blz/vector.h
+
+// QUESTIONS
+// i noticed blz::vector public functions mostly only call protected members, not other public...
+// what is the reason for that? is that more efficient? less prone to errors? more testable?
+// what does m_capacity_is_embedded mean on blz::vector::m_elements?
+// template <typename T> vs. template <class T> -- should i use typename unless class is specifically required? 
+// should my iterator class be part of the vector class, or a separate class like i have it? 
+// are iterator classes expected to work with different container types or are they specific to one (ie Vector)?
+// why is blz::vector capacity sizeof(size_type) * 8 - 1; (what occupies that one subtracted space?)
+// should i assert instead of trying to handle exception on trying to access out of bounds array index?
+
+// TO DO
+// add typedefs
+// add allocators
+// more separation between protected and public functions, such as separate
+// _init, _construct, and _destroy functions that the public constructors call
+//  prefix members with m_ when they are private/protected data
+// prefix members with _ when they are private/ protected functions
+// standardize parameter names
+// handle bad index better for at(), front, back(), and maybe iterators 
+// test using asserts instead of visually verifying correct data
+// maybe refactor everything back into class def
+
 
 template <typename T>
 class it;
@@ -25,7 +48,7 @@ private:
     T* array;
     size_t next_empty{ 0 };
     size_t base{ 8 };
-    size_t array_cap{ base };   // right place to initialize these? initializer list? 
+    size_t array_cap{ base };
 
     size_t calc_cap(size_t sz);
     void reallocate(size_t cap);
@@ -33,18 +56,18 @@ private:
     bool verify_exists(const size_t index) const;
 
 public:
-    Vector(); // defualt constructor
-    Vector(int size, T val); // fill constructor 
+    Vector(); // default 
+    Vector(int size, T val); // fill 
 
     template <typename it>
-    Vector(it first, it last); // range constructor
+    Vector(it first, it last); // range 
 
-    Vector(const Vector &v); // copy constructor that takes another vector 
+    Vector(const Vector &v); // copy 
 
     ~Vector();
 
     template <typename T>
-    Vector& operator=(Vector& rhs) // assignment operator
+    Vector& operator=(Vector& rhs) // assignment
     {
         if (this == &rhs)
             return *this;
@@ -56,10 +79,10 @@ public:
     T& at(const size_t index) const;  // access specified element
 
     template <typename T>
-    T& operator[](size_t index) { return at(index); };  // access specified element  
+    T& operator[](size_t index) { return at(index); };  // access specified element []
 
     template <typename T>
-    friend std::ostream& operator<<(std::ostream& os, const Vector<T>& v); // ostream operator
+    friend std::ostream& operator<<(std::ostream& os, const Vector<T>& v); // ostream
 
     T& front() const; // access the first element
     T& back() const; // access the last element
@@ -76,32 +99,23 @@ public:
     void shrink_to_fit();  // reduce capacity to fit size
 
     // MODIFIERS
-    // 
+
     void assign(const int count, const T& value); // replaces elements in the Vector with value
 
     void clear(); // clears the contents
 
     void insert(const size_t pos, const T val); // inserts val before pos
 
-    template<typename it>
-    void insert(it first, it last, const Vector<T> coll); // inserts a range of elements at a position 
-
-    template<typename it, typename args>
-    void emplace(it pos, args args);  // construct an element in a specified position
-
-    void erase(const size_t first, const size_t last);  // erases range of specified elements  -- something's broken in hhere
+    void erase(const size_t first, const size_t last);  // erases range of specified elements
     void erase(const size_t pos);  // erases a specified element
 
     void push_back(const T m); // adds element at end
 
-    void emplace_back(); // construct element in place
+    void emplace_back(); // constructs element in place
 
-    void pop_back(); // remove last elelement
+    void pop_back(); // removes last elelement
 
-    void swap(size_t a, size_t b); // swaps elements a and b
-
-    //template <typename T>
-    void swap(Vector<T>& other); // swaps elements of this Vector with elements of other Vector 
+    void swap(size_t a, size_t b); // swaps elements at index a and index b
 };
 
 template <typename T> 
@@ -144,7 +158,7 @@ void Vector<T>::manage_capacity()
 template <typename T>
 bool Vector<T>::verify_exists(const size_t index) const // returns true if index exists 
 {
-    if (-1 < index < next_empty)
+    if (0 <= index && index <= next_empty)
         return true;
 
     try { array[index]; throw std::out_of_range("Exception: That index doesnt exist"); }
@@ -153,17 +167,14 @@ bool Vector<T>::verify_exists(const size_t index) const // returns true if index
 
 /////////////////////////////////////////////////////////////////////////// CONSTRUCTORS
 
-
-// const(Type a, Type b) : variable(a), other_var(b) {}
-
 template <typename T>
-Vector<T>::Vector() // default constructor
+Vector<T>::Vector() // default
 {
     array = new T[array_cap]{};
 }
 
 template <typename T>
-Vector<T>::Vector(int size, T val) // fill constructor 
+Vector<T>::Vector(int size, T val) // fill 
 {
     array_cap = calc_cap(size);
     array = new T[array_cap]{};
@@ -172,9 +183,9 @@ Vector<T>::Vector(int size, T val) // fill constructor
         push_back(val);
 }
 
-template <typename T> // this breaks if i try to combine these
+template <typename T> // this breaks if i try to combine these.. what is this supposed to look like? 
 template <typename it>
-Vector<T>::Vector(it first, it last) // range constructor
+Vector<T>::Vector(it first, it last) // range
 {
     it temp = first;
     int size = 0;
@@ -190,13 +201,13 @@ Vector<T>::Vector(it first, it last) // range constructor
 
     while (first != last)
     {
-        push_back(*first);  // sometimes first isn't a pointer?
+        push_back(*first);
         first++;
     }
 }
 
 template <typename T>
-Vector<T>::Vector(const Vector &v) // copy constructor
+Vector<T>::Vector(const Vector &v) // copy
 {
     array_cap = calc_cap(v.next_empty);
     array = new T[array_cap]{};
@@ -211,23 +222,19 @@ Vector<T>::~Vector()
     delete[] array;
 }
 
-
-// assignment operator
-
-
 /////////////////////////////////////////////////////////////////////////// ELEMENT ACCESS
 
 template <typename T>
-T& Vector<T>::at(const size_t index) const // access specified element
-{
-    if (verify_exists(index))
-        return array[index];
-
+T& Vector<T>::at(const size_t index) const // access specified element like http://www.cplusplus.com/reference/vector/vector/at/ 
+{                                          // i wanted at/front/back to return a reference when index is valid, and throw exception when not (like std::vector)
+    if (verify_exists(index))              // veryify_exists throws an exception when index is invalid, but then we come back here and still have to return something.
+        return array[index];               // bc::array doesn't throw excpetion, instead has BC_ASSERT(n < N, n, N) where N is size, n is index
+                                           // does this mean we always expect n to be valid in production code and there is never an exception?
     T empty{};
-    return empty; // why can't i return T{}? 
+    return empty;
 }
 
-// operator[] in header file because reasons (why doesn't it work here?)
+// operator[] implemented in class def because defining it here didn't work. why?
 
 template <typename T>
 T& Vector<T>::front() const  // access the first element
@@ -242,21 +249,24 @@ T& Vector<T>::front() const  // access the first element
 template <typename T>
 T& Vector<T>::back() const // access the last element
 {
-    if (verify_exists(next_empty - 1))
-        return array[next_empty - 1];
+    if (verify_exists(next_empty))
+        return array[next_empty];
 
     T empty{};
     return empty;
 }
 
-template <typename T>
-T* Vector<T>::data() const { return array; } // direct access to the underlying array 
+template <typename T> 
+T* Vector<T>::data() const // direct access to the underlying array 
+{ 
+    if (next_empty > 0)
+        return array;
+ 
+    return nullptr;
+} 
 
-
-/////////////////////////////////////////////////////////////////////////// ITERATORS 
-
-template <typename T>
-class it
+template <typename T> 
+class it // iterator
 {
     size_t i;
     Vector<T>& parent;
@@ -266,45 +276,36 @@ public:
 
     T& operator*() { return parent.at(i); }
 
-    it* operator++(int)
+    it* operator++(int) // todo: address when iterator goes out of bounds
     {
         i++;
         return this;
     }
 
-
     template <typename T>
-    friend bool operator==(it<T>& lhs, it<T>& rhs);
+    friend bool operator==(it<T>& lhs, it<T>& rhs); // are two iterators at the same position the exact same iterator? 
 
     template <typename T>
     friend bool operator!=(it<T>& lhs, it<T>& rhs);
-
-  
 };
 
 template <typename T>
-bool operator==(it<T>& lhs, it<T>& rhs) { return lhs.i == rhs.i; }
-
-template <typename T>
-bool operator!=(it<T>& lhs, it<T>& rhs) { return !(lhs == rhs); }
-
-
-
-template <typename T>
-it<T> Vector<T>::begin() 
+it<T> Vector<T>::begin() // gets iterator at the first element
 {
-    it<T> i(*this, 0);
+    verify_exists(0);
+    it<T> i(*this, 0); // should you be allowed to create an iterator for an empty vector?
     return i;
 }
 
 template <typename T>
-it<T> Vector<T>::end()
+it<T> Vector<T>::end()// gets iterator at the last element
 {
-    it<T> i(*this, next_empty - 1);
+    verify_exists(next_empty - 1);
+    it<T> i(*this, next_empty - 1); // should you be allowed to create an iterator for an empty vactor?
     return i;
 }
 
-/////////////////////////////////////////////////////////////////////////// CAPACITY  (excluded std::max_size and reserve)
+/////////////////////////////////////////////////////////////////////////// CAPACITY
 
 template <typename T>
 const bool Vector<T>::empty() const { return (next_empty == 0); } // returns true if empty
@@ -316,7 +317,7 @@ template <typename T>
 size_t Vector<T>::capacity() const { return array_cap; } // returns max elements before resize
 
 template <typename T>
-void Vector<T>::shrink_to_fit()  // reduce capacity to fit size
+void Vector<T>::shrink_to_fit()  // reduces capacity to fit size
 {
     if (calc_cap(next_empty) < array_cap)
         reallocate(calc_cap(next_empty));
@@ -325,13 +326,13 @@ void Vector<T>::shrink_to_fit()  // reduce capacity to fit size
 /////////////////////////////////////////////////////////////////////////// MODIFIERS
 
 template <typename T>
-void Vector<T>::assign(const int count, const T& value) // replaces elements in the Vector with value
+void Vector<T>::assign(const int count, const T& val) // replaces elements in the Vector with value
 {
     clear();
     if (array_cap < count) { reallocate(calc_cap(count)); }
 
     for (size_t i = 0; i < count; i++)
-        push_back(value);
+        push_back(val);
 }
 
 template <typename T>
@@ -344,49 +345,41 @@ void Vector<T>::clear() // clears the contents
 template <typename T>
 void Vector<T>::insert(const size_t pos, const T val) // inserts val before pos
 {
-    if (verify_exists(pos))
-    {
-        manage_capacity();
-        for (size_t i = next_empty; i >= pos; i--)
-            array[i] = array[i - 1];
+    if (!verify_exists(pos))
+        return;
 
-        array[pos] = val;
-        next_empty++;
-    }
+    manage_capacity();
+    for (size_t i = next_empty; i >= pos; i--)
+        array[i] = array[i - 1];
+
+    array[pos] = val;
+    next_empty++;
 }
 
 template <typename T>
-template <typename it>
-void Vector<T>::insert(it first, it last, const Vector<T> coll) {} // inserts a range of elements at a position 
-
-
-template <typename T>
-template <typename it, typename args>
-void Vector<T>::emplace(it pos, args args) {} // construct an element in a specified position
-
-
-template <typename T>
-void Vector<T>::erase(const size_t first, const size_t last)   // erases range of specified elements  --  something's broken in here
+void Vector<T>::erase(const size_t first, const size_t last)   // erases range of specified elements
 {
-    if (verify_exists(last) && verify_exists(first))
+    if (first > last)
+        return;
+
+    int count = last - first; 
+    while (count < last)
     {
-        for (size_t i = first; i < last; i++)
-        {
-            erase(i);
-        }
+        erase(first); // i don't think this is efficient
+        count--;
     }
 }
 
 template <typename T>
 void Vector<T>::erase(const size_t pos)   // erases a specified element
 {
-    if (verify_exists(pos))
-    {
-        for (size_t i = pos; i < size(); i++)
-            array[i] = array[i + 1];
+    if (!verify_exists(pos))
+        return;
 
-        next_empty--;
-    }
+    for (size_t i = pos; i < size(); i++)
+        array[i] = array[i + 1];
+
+    next_empty--;
 }
 
 template <typename T>
@@ -398,7 +391,7 @@ void Vector<T>::push_back(const T m) // adds element at end
 }
 
 template <typename T>
-void Vector<T>::emplace_back() // construct element in place
+void Vector<T>::emplace_back() // construct element in place (should take constructor args)
 {
     manage_capacity();
     array[next_empty] = T{};
@@ -408,11 +401,11 @@ void Vector<T>::emplace_back() // construct element in place
 template <typename T>
 void Vector<T>::pop_back() // remove last elelement
 {
-    if (next_empty)
-    {
-        array[next_empty - 1] = T{};
-        next_empty--;
-    }
+    if (!next_empty)
+        return;
+
+    array[next_empty - 1] = T{}; // construct a new object there in memory so that data is actually gone.. is this neccessary? 
+    next_empty--;
 }
 
 template <typename T>
@@ -420,51 +413,64 @@ void Vector<T>::swap(size_t a, size_t b) // swaps elements a and b
 {
     if (verify_exists(a) && verify_exists(b))
     {
-        T temp = array[a];
+        T* temp = new T;
+        *temp = array[a];
         array[a] = array[b];
-        array[b] = temp;
+        array[b] = *temp;
+        delete temp;
     }
 }
 
-template <typename T>
-void Vector<T>::swap(Vector& other) { } // swaps elements of this Vector with elements of other Vector 
+/////////////////////////////////////////////////////////////////////////// TEST TYPE
+
+struct myCustomType  // user-defined data type for tests
+{
+    int number{ 3 }; 
+    int* ptr = nullptr;
+
+    myCustomType() { }
+    myCustomType(int n) { number = n; }
+    ~myCustomType() {  }
+    friend std::ostream& operator<<(std::ostream& os, const myCustomType& t);
+    int operator*() { return number; }
+
+    myCustomType operator++(int) // these are here so this type works with the tests 
+    {
+        number++;
+        return *this;
+    }
+
+    template <typename T>
+    friend bool operator==(it<T>& lhs, it<T>& rhs);
+
+    template <typename T>
+    friend bool operator!=(it<T>& lhs, it<T>& rhs);
+};
 
 /////////////////////////////////////////////////////////////////////////// OTHER
+/// 
+std::ostream& operator<<(std::ostream& os, const myCustomType& t) // ostream for myCustomType
+{
+    os << "x";
+    return os;
+}
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const Vector<T>& v)
+std::ostream& operator<<(std::ostream& os, const Vector<T>& v) // ostream for Vector
 {
     os << "[ ";
 
     for (size_t i = 0; i < v.next_empty; i++)
     {
-        os << v.array[i] << " ";
+        os << v.array[i] << " "; // is there a way to handle when T doesn't support << ?
     }
 
     os << "]";
- 
-    // how to handle this when we have some type that doesn't work here?
-
     return os;
 }
 
-/////////////////////////////////////////////////////////////////////////// TEST TYPE
+template <typename T>
+bool operator==(it<T>& lhs, it<T>& rhs) { return *lhs == *rhs; } // is this right for iterator? both iterator and myCustomType use this.. is that oka? 
 
-struct myCustomType  // test data type that allocates its own memory 
-{
-    int* num = nullptr;
-    int cnt{ 3 };
-
-    myCustomType() { num = new int[cnt] {}; std::cout << "\n   myCustomType constructor " << num; }
-    myCustomType(int n) { cnt = n; myCustomType(); std::cout << "\n   myCustomType(n) constructor " << num; } // how to create Vector of a type with args (use this constructor)? 
-    ~myCustomType() { std::cout << "\n   myCustomType destructor " << num; delete[] num; }
-    friend std::ostream& operator<<(std::ostream& os, const myCustomType& t);
-};
-
-std::ostream& operator<<(std::ostream& os, const myCustomType& t) // ostream for myCustomType
-{
-    for (size_t i = 0; i < t.cnt; i++)
-        os << t.num[i] << " ";
-
-    return os;
-}
+template <typename T>
+bool operator!=(it<T>& lhs, it<T>& rhs) { return !(lhs == rhs); }

@@ -18,6 +18,9 @@ int main()
     Vector<int> icop(ifil); // copy
     Vector<int> iran(icop.begin(), icop.end()); // range 
 
+    std::vector<int> diffTypeVector{ 99,88,77 };
+    Vector<double> myDiffTypeIttVec(diffTypeVector.begin(), diffTypeVector.end()); // range, diff type
+
     Vector<double> ddef; // default
     Vector<double> dfil(4, 1.0); // fill
     Vector<double> dcop(dfil); // copy
@@ -28,54 +31,93 @@ int main()
     Vector<char> ccop(cfil); // copy
     Vector<char> cran(ccop.begin(), ccop.end()); // range
 
-    std::vector<int> diffTypeVector{ 99,88,77 };
-    Vector<double> myDiffTypeIttVec(diffTypeVector.begin(), diffTypeVector.end());
-
-    const char* str1 = "Hello";
-
-    Vector<char[5]> cvdef; // default
-    //Vector<char[5]> cvfil(4, str1); // fill
-    //Vector<char[5]> cvcop(cvfil); // copy
-    //Vector<char[5]> cvran(cvcop.begin(), cvcop.end()); // range
-
-   // cvdef.push_back(str1);
-
-    Vector<std::string> sdef; // default
-    //Vector<std::string> sfil(4, str1); // fill
-    //Vector<std::string> scop(sfil); // copy
-    //Vector<char> cran(ccop.begin(), ccop.end()); // range
-
-    sdef.push_back(str1);
+    // run tests on vector of char
 
     Vector<char> myChVec; 
 
-    testAccess(myChVec); // empty list tests
+    testAccess(myChVec); // empty list
     testModifiers(myChVec);
     testAccess(myChVec);
     testCapacity(myChVec);
 
-    Vector<int> myIntVec;
+    // run tests on vector of int
 
-    testAccess(myIntVec); // empty list tests
+    Vector<int> myIntVec; 
+
+    testAccess(myIntVec); // empty list
     testModifiers(myIntVec);
     testAccess(myIntVec);
     testCapacity(myIntVec);
 
+    // tests on vector of myCustomType 
     Vector<myCustomType> myCustomVec;
 
-    //testAccess(myCustomVec); // empty list tests
-    //testModifiers(myCustomVec);
-    //testAccess(myCustomVec);
-    //testCapacity(myCustomVec);
+    testAccess(myCustomVec); // empty list
+    testCapacity(myCustomVec);
+    myCustomVec.clear();
     
-    //myCustomVec.emplace_back();
+    std::cout << "\n\nMODIFIERS: myCustomType\n";
 
-     //myCustomType a{};
-     //a.num[0] = 22;
+    for (int i = 0; i < 3; i++)
+    {
+        myCustomVec.push_back(myCustomType(i));
+        std::cout << "\n   push_back(myCustomType(" << i<< ")";
+    }
 
-     // tests don't support types without increment operator
+    std::cout << "\n   " << myCustomVec << std::endl;
 
-     // customTypeVec.push_back(a); // why is the type deleted too early?
+    for (int i = 0; i < 2; i++)
+    {
+        myCustomVec.emplace_back();
+        std::cout << "\n   emplace_back()";
+    }
 
+    std::cout << "\n   " << myCustomVec << std::endl;
+
+    myCustomVec.insert(3,myCustomType(12));
+    std::cout << "\n   insert(3, myCustomType())";
+
+    std::cout << "\n   " << myCustomVec << std::endl;
+
+    myCustomVec.erase(3);
+    std::cout << "\n   erase(3)";
+
+    std::cout << "\n   " << myCustomVec << std::endl;
+
+    myCustomVec.swap(1,3);
+    std::cout << "\n   swap(1,3)";
+
+    std::cout << "\n   " << myCustomVec << std::endl;
+
+    myCustomVec.clear();
+    std::cout << "\n   clear()";
+
+    for (int i = 0; i < 5; i++)
+    {
+        myCustomVec.push_back(myCustomType(i));
+        std::cout << "\n   push_back(myCustomType(" << i << ")";
+    }
+
+    testAccess(myCustomVec);
+
+    myChVec.clear();
+    char c = 'a';
+    for (int i = 0; i < 5; i++)
+    {
+        myChVec.push_back(c);
+        c++;
+    }
+
+    // iterator tests -- why can't I declare an iterator in the test functions? 
+
+    it<char> it = myChVec.begin();
+    std::cout << "\n   it<char>: "; std::cout << *it; it++;
+    std::cout << "\n   it++: "; std::cout << *it; it++;
+    std::cout << "\n   it++: "; std::cout << *it; it++;
+    std::cout << "\n   it++: "; std::cout << *it; it++;
+    std::cout << "\n   it++: "; std::cout << *it; it++;
+    std::cout << "\n   it++: "; std::cout << *it; it++;
+
+    std::cout << "\n\n\n";
     return 0;
 }

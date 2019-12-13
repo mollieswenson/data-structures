@@ -1,23 +1,25 @@
 ﻿  main.cpp
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(115): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(114): note: while compiling class template member function 'size_t Vector<int>::calc_cap(size_t)'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(201): note: see reference to function template instantiation 'size_t Vector<int>::calc_cap(size_t)' being compiled
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(200): note: while compiling class template member function 'Vector<int>::Vector(const Vector<int> &)'
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(129): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(128): note: while compiling class template member function 'size_t Vector<int>::calc_cap(size_t)'
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(212): note: see reference to function template instantiation 'size_t Vector<int>::calc_cap(size_t)' being compiled
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(211): note: while compiling class template member function 'Vector<int>::Vector(const Vector<int> &)'
   c:\users\mswenson\desktop\repos\scratch\vector\main.cpp(18): note: see reference to function template instantiation 'Vector<int>::Vector(const Vector<int> &)' being compiled
   c:\users\mswenson\desktop\repos\scratch\vector\main.cpp(16): note: see reference to class template instantiation 'Vector<int>' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(147): warning C4804: '<': unsafe use of type 'bool' in operation
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(146): note: while compiling class template member function 'bool Vector<int>::verify_exists(const size_t) const'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(223): note: see reference to function template instantiation 'bool Vector<int>::verify_exists(const size_t) const' being compiled
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(114): note: while compiling class template member function 'size_t Vector<int>::calc_cap(size_t)'
-  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(201): note: see reference to function template instantiation 'size_t Vector<int>::calc_cap(size_t)' being compiled
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(227): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(227): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(227): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(239): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(249): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(239): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(249): warning C4172: returning address of local variable or temporary: empty
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(152): warning C4715: 'Vector<int>::verify_exists': not all control paths return a value
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(152): warning C4715: 'Vector<double>::verify_exists': not all control paths return a value
-c:\users\mswenson\desktop\repos\scratch\vector\vector.h(152): warning C4715: 'Vector<char>::verify_exists': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(365): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  c:\users\mswenson\desktop\repos\scratch\vector\vector.h(361): note: while compiling class template member function 'void Vector<int>::erase(const size_t,const size_t)'
+  c:\users\mswenson\desktop\repos\scratch\vector\tests.h(73): note: see reference to function template instantiation 'void Vector<int>::erase(const size_t,const size_t)' being compiled
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(166): warning C4715: 'Vector<int>::verify_exists': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(234): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(234): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(166): warning C4715: 'Vector<double>::verify_exists': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(166): warning C4715: 'Vector<char>::verify_exists': not all control paths return a value
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(234): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(246): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(256): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(246): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(256): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(246): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(256): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(234): warning C4172: returning address of local variable or temporary: empty
+c:\users\mswenson\desktop\repos\scratch\vector\vector.h(166): warning C4715: 'Vector<myCustomType>::verify_exists': not all control paths return a value
   vector.vcxproj -> C:\Users\mswenson\Desktop\repos\scratch\x64\Debug\vector.exe
