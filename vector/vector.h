@@ -13,16 +13,11 @@
 
 
 // implement the std::vector-like class with dynamic array: https://en.cppreference.com/w/cpp/container/vector
-// also looking at blz/vector.h https://ghosthub.corp.blizzard.net/blizzard/blz/blob/master/include/blz/vector.h
 
 // QUESTIONS
-// i noticed blz::vector public functions mostly only call protected members, not other public...
-// what is the reason for that? is that more efficient? less prone to errors? more testable?
-// what does m_capacity_is_embedded mean on blz::vector::m_elements?
 // template <typename T> vs. template <class T> -- should i use typename unless class is specifically required? 
 // should my iterator class be part of the vector class, or a separate class like i have it? 
 // are iterator classes expected to work with different container types or are they specific to one (ie Vector)?
-// why is blz::vector capacity sizeof(size_type) * 8 - 1; (what occupies that one subtracted space?)
 // should i assert instead of trying to handle exception on trying to access out of bounds array index?
 
 // TO DO
