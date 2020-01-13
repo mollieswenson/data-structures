@@ -151,10 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="hash-table.h" />
+    <ClInclude Include="hash-table-linear-probing.h" />
+    <ClInclude Include="hash-table-chaining.h" />
+    <ClInclude Include="test-hash-table-linear-probing.h" />
     <ClInclude Include="linked-list.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="test-hash-table.h" />
+    <ClInclude Include="test-hash-table-chaining.h" />
     <ClInclude Include="test-linked-list.h" />
     <ClInclude Include="test-vector.h" />
     <ClInclude Include="test.h" />

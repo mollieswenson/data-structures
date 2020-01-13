@@ -2,7 +2,9 @@
 
 #include "test-linked-list.h"
 #include "test-vector.h"
-#include "test-hash-table.h"
+#include "test-hash-table-chaining.h"
+#include "test-hash-table-linear-probing.h"
+
 
 int run_tests()
 {
@@ -12,8 +14,11 @@ int run_tests()
     if (!test_linked_list())
         std::cout << "\n  Linked List tests passed!";
     
-    if (!test_hash_table())
-        std::cout << "\n  Hash Table tests passed! \n\n";
+    if (!test_hash_table_chaining())
+        std::cout << "\n  Hash Table Chaining tests passed!";
+
+    if (!test_hash_table_linear_probing())
+        std::cout << "\n  Hash Table Linear Probing tests passed! \n\n";
 
     return 0;
 }

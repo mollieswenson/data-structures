@@ -36,10 +36,16 @@
     <ClInclude Include="test-vector.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="hash-table.h">
+    <ClInclude Include="hash-table-linear-probing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="test-hash-table.h">
+    <ClInclude Include="hash-table-chaining.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test-hash-table-linear-probing.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test-hash-table-chaining.h">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
