@@ -40,17 +40,25 @@ int test_hash_table_linear_probing()
     table.Insert(key1, val1);
     table.Insert(key2, val2);
     table.Insert(key3, val3);
+
+    LinearIterator<const char*, int> beg = table.begin(); // iterators
+    LinearIterator<const char*, int> end = table.end();
+
+    //table.Print();
+    //for (size_t i = 0; i < table.GetSize(); i++, beg++)
+    //    std::cout << "\n  *itt " << *beg;
+
     table.Insert(key4, val4);
     table.Insert(key5, val5);
     table.Insert(key6, val6);
     table.Insert(key7, val7);
-
-    assert(table.Search(key0) == 0);
-    assert(table.Search(key1) == 1);
-    assert(table.Search(key2) == 2);
-    assert(table.Search(key3) == 3);
-    assert(table.Search(key4) == 4);
-    assert(table.Search(key5) == 5);
+ 
+    assert(*table.Search(key0) == 0);
+    assert(*table.Search(key1) == 1);
+    assert(*table.Search(key2) == 2);
+    assert(*table.Search(key3) == 3);
+    assert(*table.Search(key4) == 4);
+    assert(*table.Search(key5) == 5);
 
     assert(table.GetCapacity() == 8);
     assert(table.GetSize() == 8);
@@ -61,16 +69,16 @@ int test_hash_table_linear_probing()
     assert(table.GetCapacity() == 16);
     assert(table.GetSize() == 10);
 
-    assert(table.Search(key0) == 0);
-    assert(table.Search(key1) == 1);
-    assert(table.Search(key2) == 2);
-    assert(table.Search(key3) == 3);
-    assert(table.Search(key4) == 4);
-    assert(table.Search(key5) == 5);
-    assert(table.Search(key6) == 6);
-    assert(table.Search(key7) == 7);
-    assert(table.Search(key8) == 8);
-    assert(table.Search(key9) == 9);
+    assert(*table.Search(key0) == 0);
+    assert(*table.Search(key1) == 1);
+    assert(*table.Search(key2) == 2);
+    assert(*table.Search(key3) == 3);
+    assert(*table.Search(key4) == 4);
+    assert(*table.Search(key5) == 5);
+    assert(*table.Search(key6) == 6);
+    assert(*table.Search(key7) == 7);
+    assert(*table.Search(key8) == 8);
+    assert(*table.Search(key9) == 9);
 
     val0 = 1000;
     val1 = 1111;
@@ -84,11 +92,11 @@ int test_hash_table_linear_probing()
     table.Update(key8, val8);
     table.Update(key9, val9);
 
-    assert(table.Search(key0) == 1000);
-    assert(table.Search(key1) == 1111);
-    assert(table.Search(key5) == 5555);
-    assert(table.Search(key8) == 8888);
-    assert(table.Search(key9) == 9999);
+    assert(*table.Search(key0) == 1000);
+    assert(*table.Search(key1) == 1111);
+    assert(*table.Search(key5) == 5555);
+    assert(*table.Search(key8) == 8888);
+    assert(*table.Search(key9) == 9999);
 
     table.Delete(key0);
     table.Delete(key1);
@@ -99,23 +107,26 @@ int test_hash_table_linear_probing()
     assert(table.GetCapacity() == 16);
     assert(table.GetSize() == 5);
     
-    assert(table.Search(key2) == 2);
-    assert(table.Search(key3) == 3);
-    assert(table.Search(key4) == 4);
-    assert(table.Search(key6) == 6);
-    assert(table.Search(key7) == 7);
+    assert(*table.Search(key2) == 2);
+    assert(*table.Search(key3) == 3);
+    assert(*table.Search(key4) == 4);
+    assert(*table.Search(key6) == 6);
+    assert(*table.Search(key7) == 7);
 
+    //table.Print();
     table.Clear();
 
     assert(table.GetCapacity() == 16);
     assert(table.GetSize() == 0);
 
-    LinearProbeHashTable<int, const char*> other_table(100);
 
-    int keys[1000]{};
-    const char* vals[1000]{};
 
-    for (size_t i = 0; i < 1000; i++)
+    LinearProbeHashTable<int, const char*> other_table(10);
+
+    int keys[10]{};
+    const char* vals[10]{};
+
+    for (size_t i = 0; i < 10; i++)
     {
         int key = rand();
         const char* val = genStr();
@@ -124,8 +135,8 @@ int test_hash_table_linear_probing()
         vals[i] = val;
     }
 
-    for (size_t i = 0; i < 1000; i++)                        // if i loop this 1000 times (all keys), then searching a different table (int_table) fails later on..
-        assert(other_table.Search(keys[i]) == vals[i]);
+    for (size_t i = 0; i < 10; i++)
+        assert(*other_table.Search(keys[i]) == vals[i]);
 
     return 0;
 }

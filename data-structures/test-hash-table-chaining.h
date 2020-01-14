@@ -12,17 +12,17 @@ static const char c[] =
 
 const char* genStr()
 {
-    static char key[11]{};
+    static char KeyT[11]{};
 
     for (size_t i = 0; i < 10; i++)
-        key[i] = (c[rand() % (sizeof(c) - 1)]);
+        KeyT[i] = (c[rand() % (sizeof(c) - 1)]);
 
-    return key;
+    return KeyT;
 }
 
 int test_hash_table_chaining()
 {
-    ChainedHashTable<const char*, int> table; // key type const char*
+    ChainedHashTable<const char*, int> table; // KeyT type const char*
 
     assert(table.GetSize() == 0); // expected size and capacity
     assert(table.GetCapacity() == 8);
@@ -70,17 +70,17 @@ int test_hash_table_chaining()
     assert(table.GetSize() == 16); // expected size and capacity
     assert(table.GetCapacity() == 16);
 
-    assert(table.Search(key0) == 0); // access expected values via key 
-    assert(table.Search(key1) == 1);
-    assert(table.Search(key2) == 2);
-    assert(table.Search(key3) == 3);
-    assert(table.Search(key4) == 4);
+    assert(*table.Search(key0) == 0); // access expected values via KeyT 
+    assert(*table.Search(key1) == 1);
+    assert(*table.Search(key2) == 2);
+    assert(*table.Search(key3) == 3);
+    assert(*table.Search(key4) == 4);
 
-    assert(table.Search(key11) == 11);
-    assert(table.Search(key12) == 12);
-    assert(table.Search(key13) == 13);
-    assert(table.Search(key14) == 14);
-    assert(table.Search(key15) == 15);
+    assert(*table.Search(key11) == 11);
+    assert(*table.Search(key12) == 12);
+    assert(*table.Search(key13) == 13);
+    assert(*table.Search(key14) == 14);
+    assert(*table.Search(key15) == 15);
 
     table.Delete(key5); // delete some nodes
     table.Delete(key4);
@@ -90,25 +90,26 @@ int test_hash_table_chaining()
     assert(table.GetSize() == 12); // expected size and capacity
     assert(table.GetCapacity() == 16);
 
+    //table.Print();
 
-    ChainedHashTable<const char*, const char*> rand_table; // key type const char*
+    ChainedHashTable<const char*, const char*> rand_table; // KeyT type const char*
 
     const char* keys[1000]{};
     for (size_t i = 0; i < 1000; i++)
     {
-        const char* key = genStr();
-        rand_table.Insert(key, key);
-        keys[i] = key;
+        const char* KeyT = genStr();
+        rand_table.Insert(KeyT, KeyT);
+        keys[i] = KeyT;
     }
 
     assert(rand_table.GetSize() == 1000); // expected size and capacity
     assert(rand_table.GetCapacity() == 1024);
 
     for (size_t i = 0; i < 1000; i++)
-        assert(rand_table.Search(keys[i]) == keys[i]); // expected values
+        assert(*rand_table.Search(keys[i]) == keys[i]); // expected values
 
 
-    ChainedHashTable<int, int> int_table; // key type int
+    ChainedHashTable<int, int> int_table; // KeyT type int
 
     int int_keys[1000]{};
     int int_key{};
@@ -125,7 +126,7 @@ int test_hash_table_chaining()
     assert(int_table.GetCapacity() == 1024);
 
     for (size_t i = 0; i < 1000; i++)
-        assert(int_table.Search(int_keys[i]) == int_keys[i]);
+        assert(*int_table.Search(int_keys[i]) == int_keys[i]);
         
     for (int i = 0; i < 1000; i += 10) // delete 10%
         int_table.Delete(int_keys[i]);
@@ -133,6 +134,15 @@ int test_hash_table_chaining()
     assert(int_table.GetSize() == 900); // expected size and capacity
     assert(int_table.GetCapacity() == 1024);
 
+    //int_table.Print();
+
+    //std::string strKey = "Hello I'm the KeyT"; // asserts with unsupported KeyT type
+    //std::string strVal = "Value!";
+
+    //ChainedHashTable<std::string, std::string> string_table; // KeyT type int
+
+    //string_table.Insert(strKey, strVal);
+
+
     return 0;
 }
-

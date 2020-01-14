@@ -4,23 +4,23 @@
 #include <cassert> 
 
 #include <vld.h>
-#include "hash-table-chaining.h"
+#include "hash-function.h"
 
 // LINEAR HASH NODE
 
-template <typename key, typename val>
+template <typename KeyT, typename ValT>
 struct LinearNode
 {
-    LinearNode<key, val>() {};
-    ~LinearNode<key, val>() {};
+    LinearNode<KeyT, ValT>() {};
+    ~LinearNode<KeyT, ValT>() {};
 
-    key key{};
-    val value{};
+    KeyT key{};
+    ValT value{};
 
     bool deleted{false};
 
-    template <typename key, typename val>
-    ChainedNode<key, val>& operator=(ChainedNode<key, val>& rhs)
+    template <typename KeyT, typename ValT>
+    LinearNode<KeyT, ValT>& operator=(LinearNode<KeyT, ValT>& rhs)
     {
         if (this == &rhs)
             return *this;
@@ -28,14 +28,19 @@ struct LinearNode
     }
 };
 
+template <typename KeyT, typename ValT>
+class LinearIterator;
+
 // LINEAR PROBING HASH TABLE
 
-template <typename key, typename val>
+template <typename KeyT, typename ValT>
 class LinearProbeHashTable
 {
+using NodeType = LinearNode<KeyT, ValT>;
+
 public:
-    LinearProbeHashTable() { m_init(); };
-    LinearProbeHashTable(size_t cap) : m_capacity(cap) { m_init(); };
+    LinearProbeHashTable() { Init(); };
+    LinearProbeHashTable(size_t cap) : m_capacity(cap) { Init(); };
     ~LinearProbeHashTable() 
     { 
         for (size_t i = 0; i < m_capacity; i++)
@@ -45,40 +50,44 @@ public:
         delete m_deleted;
     }
 
-    void Insert(key&, val&); // insert a node
-    void Update(key& k, val v) { m_find(k)->value = v; }; // change a node's value
-    const val& Search(key& k) { return m_find(k)->value; }; // get a node's value
-    void Delete(key&); // delete a node
+    void Insert(KeyT&, ValT&); // insert a node
+    void Update(KeyT&, ValT); // change a node's value
+    ValT* Search(KeyT&); // get a node's value 
+    void Delete(KeyT&); // delete a node
     void Clear(); // delete all nodes
+
+    LinearIterator<KeyT, ValT> begin(); // returns iterator to first node
+    LinearIterator<KeyT, ValT> end();   // returns iterator to last node
 
     size_t GetSize() { return m_size; }; // returns total number of nodes
     size_t GetCapacity() { return m_capacity; }; // returns max number of nodes arr can hold
+
+    void Print();
 
 private:
     size_t m_size{ 0 }; // total number of nodes
     size_t m_capacity{ 8 }; // size of underlying array
 
-    LinearNode<key, val>** m_array; // ptr to node in array
-    LinearNode<key, val>* m_deleted = new LinearNode<key, val>; // placeholder for deleted nodes
+    NodeType** m_array; // ptr to node in array
+    NodeType* m_deleted = new NodeType; // placeholder for deleted nodes
 
-    LinearNode<key, val>* m_find(key&); // retuns node for key
-    size_t m_hash(const char*); // hash func for const char *
-    size_t m_hash(int); // hash fucn for int
-    void m_reallocate(size_t); // allocate new array, rehash and move all nodes
-    void m_init(); // ititializer creates array and placeholder for deleted nodes   
+    NodeType* Find(KeyT&); // retuns node for KeyT
+    size_t Hash(const KeyT& k); // returns index in array
+    void Reallocate(size_t); // allocate new array, rehash and move all nodes
+    void Init(); // array and placeholder for deleted nodes   
 };
 
-template <typename key, typename val>
-void LinearProbeHashTable<key, val>::Insert(key& k, val& v) 
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Insert(KeyT& k, ValT& v) 
 {
     if (m_size == m_capacity)
-        m_reallocate(m_capacity * 2);
+        Reallocate(m_capacity * 2);
 
-    LinearNode<key, val>* node = new LinearNode<key, val>;
+    NodeType* node = new NodeType;
     node->value = v;
     node->key = k;
 
-    size_t pos = m_hash(k);
+    size_t pos = Hash(k);
 
     while (m_array[pos] && !m_array[pos]->deleted)
         pos == m_capacity - 1 ? pos = 0 : pos++;
@@ -87,76 +96,81 @@ void LinearProbeHashTable<key, val>::Insert(key& k, val& v)
     m_size++;
 }
 
-template <typename key, typename val>
-void LinearProbeHashTable<key, val>::Delete(key& k)
-{   
-    LinearNode<key, val>* temp = m_find(k);
-    temp = m_deleted; // ?    m_find(k) = m_deleted;
-    m_size--;
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Update(KeyT& k, ValT v) // change a node's value
+{
+    NodeType* node = Find(k);
+    if (node)
+        node->value = v;
 }
 
-template <typename key, typename val>
-void LinearProbeHashTable<key, val>::Clear()
+template <typename KeyT, typename ValT>
+ValT* LinearProbeHashTable<KeyT, ValT>::Search(KeyT& k)  // get a node's value 
+{
+    NodeType* node = Find(k);
+    if (node)
+        return &node->value;
+
+    return nullptr;
+}
+
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Delete(KeyT& k)
+{   
+    NodeType* temp = Find(k);
+    if (temp)
+    {
+        temp = m_deleted;
+        m_size--;
+    }
+}
+
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Clear()
 {
     for (size_t i = 0; i < m_capacity; i++)
         delete m_array[i];
 
     delete m_array;
-    m_array = new LinearNode<key, val>*[m_capacity] {nullptr};
+    m_array = new NodeType*[m_capacity] {nullptr};
     m_size = 0;
 }
 
-template <typename key, typename val>
-size_t LinearProbeHashTable<key, val>::m_hash(const char* k) // hash const char *
+template <typename KeyT, typename ValT>
+size_t LinearProbeHashTable<KeyT, ValT>::Hash(const KeyT& k) // hash func
 {
-    int hash = 401;
-
-    while (*k != '\0')
-    {
-        hash = hash << 4;
-        hash = hash + (int)(*k);
-        k++;
-    }
-    return hash % m_capacity;
+    return HashFunction<KeyT>::Hash(k) % m_capacity;
 }
 
-template <typename key, typename val>
-size_t LinearProbeHashTable<key, val>::m_hash(int k) // hash int
+template <typename KeyT, typename ValT>
+typename LinearProbeHashTable<KeyT, ValT>::NodeType* LinearProbeHashTable<KeyT, ValT>::Find(KeyT& k)
 {
-    int hash = 401;
-    hash = hash << 4;
-    hash = hash + k;
-    return hash % m_capacity;
-}
-
-template <typename key, typename val>
-LinearNode<key, val>* LinearProbeHashTable<key, val>::m_find(key& k)
-{
-    size_t pos = m_hash(k);
+    size_t pos = Hash(k);
     size_t count = 0;
     while (!m_array[pos] || m_array[pos]->key != k)
     {
         pos == m_capacity - 1 ? pos = 0 : pos++;
         count++;
-        assert(count < m_capacity); //failed search
+        if (count > m_capacity) //failed search
+            return nullptr;
     }
 
-    LinearNode<key, val>* node = m_array[pos];
+    NodeType* node = m_array[pos];
     return node;
 }
 
-template <typename key, typename val>
-void LinearProbeHashTable<key, val>::m_reallocate(size_t s)
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Reallocate(size_t s)
 {
     assert(s >= m_size);
 
     m_capacity = s;
-    LinearNode<key, val>** new_array = new LinearNode<key, val>*[m_capacity]{nullptr};
+    NodeType** new_array = new NodeType*[m_capacity]{nullptr};
     
     size_t pos{};
     for (size_t i = 0; i < m_size; i++)
     {
-        pos = m_hash(m_array[i]->key);
+        pos = Hash(m_array[i]->key);
 
         while (new_array[pos])
             pos == m_capacity - 1 ? pos = 0 : pos++;
@@ -168,10 +182,81 @@ void LinearProbeHashTable<key, val>::m_reallocate(size_t s)
     m_array = new_array;
 }
 
-template <typename key, typename val>
-void LinearProbeHashTable<key, val>::m_init()
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Init()
 {
-    m_array = new LinearNode<key, val>*[m_capacity] {nullptr};
+    m_array = new NodeType*[m_capacity] {nullptr};
     m_deleted->deleted = true;
 }
 
+template <typename KeyT, typename ValT>
+LinearIterator<KeyT, ValT> LinearProbeHashTable<KeyT, ValT>::end()
+{
+    size_t pos = m_capacity - 1;
+    while (!m_array[pos])
+        pos--;
+
+    LinearIterator<KeyT, ValT> i(this->m_array, pos);
+    return i;
+}
+
+template <typename KeyT, typename ValT>
+LinearIterator<KeyT, ValT> LinearProbeHashTable<KeyT, ValT>::begin()
+{
+    LinearIterator<KeyT, ValT> i(this->m_array, 0);
+    return i;
+}
+
+template <typename KeyT, typename ValT>
+void LinearProbeHashTable<KeyT, ValT>::Print()
+{
+    for (size_t i = 0; i < m_capacity; i++)
+    {
+        std::cout << "\n[" << i << "] ";
+
+        if (m_array[i])
+            std::cout << m_array[i]->value;
+    }
+}
+
+
+template <typename KeyT, typename ValT>   // key iterator
+class LinearIterator
+{
+    size_t i;
+    LinearNode<KeyT, ValT>** parent;
+
+public:
+    LinearIterator<KeyT, ValT>(LinearNode<KeyT, ValT>** par, size_t pos) : i(pos), parent(par) {}
+
+    KeyT& operator*()
+    {
+        assert(parent[i] != nullptr);
+        return parent[i]->key;  
+    }
+
+    LinearIterator* operator++(int)
+    {
+        do { i++; }
+        while (!parent[i]);
+
+        return this;
+    }
+
+    LinearIterator* operator--(int)
+    {
+        do { i--; }
+        while (!parent[i]);
+
+        return this;
+    }
+
+    friend bool operator==(LinearIterator<KeyT, ValT>& lhs, LinearIterator<KeyT, ValT>& rhs);
+    friend bool operator!=(LinearIterator<KeyT, ValT>& lhs, LinearIterator<KeyT, ValT>& rhs);
+};
+
+template <typename KeyT, typename ValT>
+bool operator==(LinearIterator<KeyT, ValT>& lhs, LinearIterator<KeyT, ValT>& rhs) { return *lhs == *rhs; }
+
+template <typename KeyT, typename ValT>
+bool operator!=(LinearIterator<KeyT, ValT>& lhs, LinearIterator<KeyT, ValT>& rhs) { return !(lhs == rhs); }

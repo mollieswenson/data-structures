@@ -14,7 +14,7 @@ class Vector
 public:
     Vector(); // default 
 
-    Vector(int size, T val); // fill
+    Vector(int size, T ValT); // fill
 
     //template <typename Iterator>
     //Vector(Iterator first, Iterator last); // range (broken)
@@ -54,9 +54,9 @@ public:
 
     // MODIFIERS
 
-    void assign(const int pos, const T& val); // replaces all elements in the Vector with value
+    void assign(const int pos, const T& ValT); // replaces all elements in the Vector with value
     void clear(); // clears the contents
-    void insert(const size_t pos, const T& val); // inserts val before pos
+    void insert(const size_t pos, const T& ValT); // inserts ValT before pos
     void erase(const size_t beg, const size_t end);  // erases range of elements 
     void erase(const size_t);  // erases a specified element
     void push_back(const T&); // adds element at end
@@ -86,13 +86,13 @@ Vector<T>::Vector() // default
 }
 
 template <typename T>
-Vector<T>::Vector(int size, T val) // fill 
+Vector<T>::Vector(int size, T ValT) // fill 
 {
     _capacity = _calc_capacity(size);
     _array = new T[_capacity]{};
 
     for (size_t i = 0; i < size; i++)
-        push_back(val);
+        push_back(ValT);
 }
 
 //template <typename T>
@@ -176,7 +176,7 @@ public:
 
     T& operator*() { return parent.at(i); }
 
-    Iterator* operator++(int) 
+    Iterator* operator++(int)
     {
         i++;
         return this;
@@ -206,7 +206,7 @@ Iterator<T> Vector<T>::begin()
 template <typename T>
 Iterator<T> Vector<T>::end()
 {
-    Iterator<T> i(*this, _size); 
+    Iterator<T> i(*this, _size);
     return i;
 }
 
@@ -235,13 +235,13 @@ void Vector<T>::reserve(size_t cap)
 // MODIFIERS
 
 template <typename T>
-void Vector<T>::assign(const int pos, const T& val)
+void Vector<T>::assign(const int pos, const T& ValT)
 {
     clear();
     if (_capacity < pos) { _reallocate(_calc_capacity(pos)); }
 
     for (size_t i = 0; i < pos; i++)
-        push_back(val);
+        push_back(ValT);
 }
 
 template <typename T>
@@ -252,7 +252,7 @@ void Vector<T>::clear()
 }
 
 template <typename T>
-void Vector<T>::insert(const size_t pos, const T& val)
+void Vector<T>::insert(const size_t pos, const T& ValT)
 {
     _check(pos);
     _manage_capacity();
@@ -260,7 +260,7 @@ void Vector<T>::insert(const size_t pos, const T& val)
     for (size_t i = _size; i > pos; i--)
         _array[i] = _array[i - 1];
 
-    _array[pos] = val;
+    _array[pos] = ValT;
     _size++;
 }
 

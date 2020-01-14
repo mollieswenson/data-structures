@@ -4,23 +4,24 @@
 #include <cassert>
 
 #include <vld.h>
+#include "hash-function.h"
 
 // CHAINED HASH NODE
 
-template <typename key, typename val>
+template <typename KeyT, typename ValT>
 struct ChainedNode
 {
-    ChainedNode<key, val>() {};
-    ~ChainedNode<key, val>() {};
+    ChainedNode<KeyT, ValT>() {};
+    ~ChainedNode<KeyT, ValT>() {};
 
-    key hash_key{}; 
-    val value{};
+    KeyT key{}; 
+    ValT value{};
 
     ChainedNode* next{ };
     ChainedNode* prev{ };
 
-    template <typename key, typename val>
-    ChainedNode<key, val>& operator=(ChainedNode<key, val>& rhs)
+    template <typename KeyT, typename ValT>
+    ChainedNode<KeyT, ValT>& operator=(ChainedNode<KeyT, ValT>& rhs)
     {
         if (this == &rhs)
             return *this;
@@ -28,48 +29,57 @@ struct ChainedNode
     }
 };
 
+template <typename KeyT, typename ValT>
+class ChainedIterator;
+
 // CHAINED HASH TABLE
 
-template <typename key, typename val>
+template <typename KeyT, typename ValT>
 class ChainedHashTable
 {
-public:
-    ChainedHashTable() { m_array = new ChainedNode<key, val>*[m_capacity] {nullptr}; };
-    ChainedHashTable(size_t cap) : m_capacity(cap) { m_array = new ChainedNode<key, val>*[m_capacity] {nullptr}; };
-    ~ChainedHashTable() { m_clear(); delete[] m_array; };
+    using NodeType = ChainedNode<KeyT, ValT>;
 
-    void Insert(key&, val);  // insert a node
-    const val& Search(key&); // const breaks this
-    void Delete(key&); // delete a node
-    void Update(key&, val); // change a node's value
-    void Clear() { m_clear; } // delete all nodes 
+public:
+    ChainedHashTable() { m_array = new NodeType*[m_capacity] {nullptr}; };
+    ChainedHashTable(size_t cap) : m_capacity(cap) { m_array = new NodeType*[m_capacity] {nullptr}; };
+    ~ChainedHashTable() { ClearArray(); delete[] m_array; };
+
+    void Insert(KeyT&, ValT);  // insert a node
+    ValT* Search(KeyT&); // search for a node
+    void Delete(KeyT&); // delete a node
+    void Update(KeyT&, ValT); // change a node's value
+    void Clear() { ClearArray; } // delete all nodes 
+
+    ChainedIterator<KeyT, ValT> begin(); // returns iterator at first node
+    ChainedIterator<KeyT, ValT> end();   // returns iterator to last node
 
     size_t GetSize() { return m_size; }; // returns total number of nodes
     size_t GetCapacity() { return m_capacity; }; // returns total number of buckets
+
+    void Print(); // for testing
 
 private:
     size_t m_size { 0 }; // nodes in the table
     size_t m_capacity{ 8 }; // buckets in the array
 
-    ChainedNode<key, val>** m_array;
+    NodeType** m_array;
 
-    size_t m_hash(const char*); // hash fucn for const char*
-    size_t m_hash(int); // hash function for int
-    void m_clear(); // clears all nodes from m_array
-    void m_reallocate(size_t); // reallocate new array, hash and move all nodes 
+    size_t Hash(const KeyT&); // hash function (can add type overrides to HashFunc)
+    void ClearArray(); // clears all nodes from m_array
+    void Reallocate(size_t); // reallocate new array, hash and move all nodes 
 };
 
-template <typename key, typename val>
-void ChainedHashTable<key, val>::Insert(key& hash_key, val value)
+template <typename KeyT, typename ValT>
+void ChainedHashTable<KeyT, ValT>::Insert(KeyT& k, ValT v)
 { 
     if (m_size / m_capacity >= 1) // load factor
-        m_reallocate(m_capacity * 2);
+        Reallocate(m_capacity * 2);
 
-    ChainedNode<key, val>* node = new ChainedNode<key, val>; 
-    node->value = value; 
-    node->hash_key = hash_key;
+    NodeType* node = new NodeType; 
+    node->value = v; 
+    node->key = k;
 
-    size_t pos = m_hash(hash_key); 
+    size_t pos = Hash(k); 
 
     if (!m_array[pos])
     {
@@ -77,7 +87,7 @@ void ChainedHashTable<key, val>::Insert(key& hash_key, val value)
     }
     else
     {
-        ChainedNode<key, val>* current = m_array[pos];
+        NodeType* current = m_array[pos];
 
         while (current->next)
             current = current->next;
@@ -89,49 +99,49 @@ void ChainedHashTable<key, val>::Insert(key& hash_key, val value)
     m_size++;
 }
 
-template <typename key, typename val>
-const val& ChainedHashTable<key, val>::Search(key& hash_key)
+template <typename KeyT, typename ValT>
+ValT* ChainedHashTable<KeyT, ValT>::Search(KeyT& k) // return ptr here...
 {
-    size_t pos = m_hash(hash_key);
+    size_t pos = Hash(k);
     assert(m_array[pos]);
 
-    ChainedNode<key, val>* current = m_array[pos];
+    NodeType* current = m_array[pos];
 
-    while (current->hash_key != hash_key)
+    while (current->key != k)
         current = current->next;
 
     assert(current);
 
-    return current->value;
+    return &current->value;
 }
 
-template <typename key, typename val>
-void ChainedHashTable<key, val>::Update(key& hash_key, val value)
+template <typename KeyT, typename ValT>
+void ChainedHashTable<KeyT, ValT>::Update(KeyT& k, ValT v)
 {
-    int pos = Hash(hash_key);
-    ChainedNode<key, val>* current = m_array[pos];
+    int pos = Hash(k);
+    NodeType* current = m_array[pos];
 
-    while (current->hash_key != hash_key)
+    while (current->key != k)
         current = current->next;
 
     assert(current);
 
-    current->value = value;
+    current->value = v;
 }
 
-template <typename key, typename val>
-void ChainedHashTable<key, val>::Delete(key& hash_key)
+template <typename KeyT, typename ValT>
+void ChainedHashTable<KeyT, ValT>::Delete(KeyT& k)
 {
-    size_t pos = m_hash(hash_key);
-    ChainedNode<key, val>* current = m_array[pos];
+    size_t pos = Hash(k);
+    NodeType* current = m_array[pos];
 
-    while (current->hash_key != hash_key)
+    while (current->key != k)
         current = current->next;
 
     assert(current);
 
-    ChainedNode<key, val>* before = current->prev;
-    ChainedNode<key, val>* after = current->next;
+    NodeType* before = current->prev;
+    NodeType* after = current->next;
 
     if (!before && !after) // single node
         m_array[pos] = nullptr;
@@ -152,34 +162,17 @@ void ChainedHashTable<key, val>::Delete(key& hash_key)
     m_size--;
 }
 
-template <typename key, typename val>
-size_t ChainedHashTable<key, val>::m_hash(const char* hash_key) // hash const char *
+template <typename KeyT, typename ValT>
+size_t ChainedHashTable<KeyT, ValT>::Hash(const KeyT& k) // hash func
 {
-    int hash = 401; // start with prime
-
-    while (*hash_key != '\0')
-    {
-        hash = hash << 4; // left shift
-        hash = hash + (int)(*hash_key); // plus (int)hash_key
-        hash_key++;
-    }
-    return hash % m_capacity; // not sufficiently random?
+    return HashFunction<KeyT>::Hash(k) % m_capacity;
 }
 
-template <typename key, typename val>
-size_t ChainedHashTable<key, val>::m_hash(int hash_key) // hash int
+template <typename KeyT, typename ValT>
+void ChainedHashTable<KeyT, ValT>::ClearArray()
 {
-    int hash = 401;
-    hash = hash << 4;
-    hash = hash + hash_key;
-    return hash % m_capacity; 
-}
-
-template <typename key, typename val>
-void ChainedHashTable<key, val>::m_clear()
-{
-    ChainedNode<key, val>* current{};
-    ChainedNode<key, val>* next{};
+    NodeType* current{};
+    NodeType* next{};
 
     for (int i = 0; i < m_capacity; i++)
     {
@@ -195,14 +188,14 @@ void ChainedHashTable<key, val>::m_clear()
     }
 }
 
-template <typename key, typename val>
-void ChainedHashTable<key, val>::m_reallocate(size_t s)
+template <typename KeyT, typename ValT>
+void ChainedHashTable<KeyT, ValT>::Reallocate(size_t s)
 {
     m_capacity = s;
-    ChainedNode<key, val>** new_array = new ChainedNode<key, val>*[m_capacity] {nullptr};
-    ChainedNode<key, val>* node{};
-    ChainedNode<key, val>* last{};
-    ChainedNode<key, val>* next{};
+    NodeType** new_array = new NodeType*[m_capacity] {nullptr};
+    NodeType* node{};
+    NodeType* last{};
+    NodeType* next{};
 
     size_t pos{};
 
@@ -212,7 +205,7 @@ void ChainedHashTable<key, val>::m_reallocate(size_t s)
 
         while (node) // each node in src bucket
         {
-            pos = m_hash(node->hash_key);
+            pos = Hash(node->key);
              
             if (!new_array[pos])
             {
@@ -246,8 +239,84 @@ void ChainedHashTable<key, val>::m_reallocate(size_t s)
     
 }
 
-template <typename key, typename val>
-bool operator==(ChainedNode<key, val>& lhs, ChainedNode<key, val>& rhs) { return *lhs == *rhs; }
+template <typename KeyT, typename ValT>
+ChainedIterator<KeyT, ValT> ChainedHashTable<KeyT, ValT>::end()
+{
+    size_t pos = m_capacity - 1;
+    while (!m_array[pos])
+        pos--;
 
-template <typename key, typename val>
-bool operator!=(ChainedNode<key, val>& lhs, ChainedNode<key, val>& rhs) { return !(lhs == rhs); }
+    ChainedIterator<KeyT, ValT> i(this->m_array, pos);
+    return i;
+}
+
+template <typename KeyT, typename ValT>
+ChainedIterator<KeyT, ValT> ChainedHashTable<KeyT, ValT>::begin()
+{
+    ChainedIterator<KeyT, ValT> i(this->m_array, 0);
+    return i;
+}
+
+template <typename KeyT, typename ValT>
+void ChainedHashTable<KeyT, ValT>::Print()
+{
+    for (size_t i = 0; i < m_capacity; i++)
+    {
+        std::cout << "\n\nBucket [" << i << "] ";
+        
+        NodeType* node = m_array[i];
+
+        while (node)
+        {
+            std::cout << "(" << node->value << ") ";
+            node = node->next;
+        }
+    }
+}
+
+
+template <typename KeyT, typename ValT>   // key iterator
+class ChainedIterator
+{
+    size_t i;
+    ChainedNode<KeyT, ValT>** parent;
+
+public:
+    ChainedIterator<KeyT, ValT>(ChainedNode<KeyT, ValT>** par, size_t pos) : i(pos), parent(par) {}
+
+    KeyT& operator*()
+    {
+        // to do
+
+        assert(parent[i] != nullptr);
+        return parent[i]->key;
+    }
+
+    ChainedIterator* operator++(int)
+    {
+
+        // to do
+
+        do { i++; } while (!parent[i]);
+
+        return this;
+    }
+
+    ChainedIterator* operator--(int)
+    {
+        // to do
+
+        do { i--; } while (!parent[i]);
+
+        return this;
+    }
+
+    friend bool operator==(ChainedIterator<KeyT, ValT>& lhs, ChainedIterator<KeyT, ValT>& rhs);
+    friend bool operator!=(ChainedIterator<KeyT, ValT>& lhs, ChainedIterator<KeyT, ValT>& rhs);
+};
+
+template <typename KeyT, typename ValT>
+bool operator==(ChainedIterator<KeyT, ValT>& lhs, ChainedIterator<KeyT, ValT>& rhs) { return *lhs == *rhs; }
+
+template <typename KeyT, typename ValT>
+bool operator!=(ChainedIterator<KeyT, ValT>& lhs, ChainedIterator<KeyT, ValT>& rhs) { return !(lhs == rhs); }
