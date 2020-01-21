@@ -1,2 +1,2 @@
-# scratch
-Practice stuff
+# Data Structures
+My practice writing C++ data structures. 
