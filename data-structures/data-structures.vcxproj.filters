@@ -51,6 +51,12 @@
     <ClInclude Include="hash-function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="binary-search-tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test-binary-search-tree.h">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
