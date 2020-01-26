@@ -5,6 +5,7 @@
 #include "test-hash-table-chaining.h"
 #include "test-hash-table-linear-probing.h"
 #include "test-binary-search-tree.h"
+#include "test-red-black-tree.h"
 
 int run_tests()
 {
@@ -21,7 +22,10 @@ int run_tests()
         std::cout << "\n  Hash Table Linear Probing tests passed!";
 
     if (!test_bst())
-        std::cout << "\n  Binary Search Tree tests passed!  \n\n";
+        std::cout << "\n  Binary Search Tree tests passed!";
+
+	if (!test_rbt())
+		std::cout << "\n  Red Black Tree tests passed!  \n\n";
 
     return 0;
 }

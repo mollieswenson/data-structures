@@ -5,44 +5,44 @@
 
 #include <vld.h>
 
-struct bst_node 
+struct BstNode 
 {
-    bst_node(int k) : key(k) {};
-    ~bst_node() { };
+    BstNode(int k) : key(k) {};
+    ~BstNode() { };
 
     int key{};
 
-    bst_node* left{nullptr};
-    bst_node* right{nullptr};
+    BstNode* left{nullptr};
+    BstNode* right{nullptr};
 };
 
-class bst
+class Bst
 {
 public:
-    bst() {};
-    ~bst() { if (root) { DeleteRecur(root); } };
+    Bst() {};
+    ~Bst() { if (root) { DeleteRecur(root); } };
 
-    bst_node* Insert(int); // insert a node using given key
+    BstNode* Insert(int); // insert a node using given key
     void Delete(int); // deletes node with given key
-    bst_node* Search(int); // returns ptr to node with given key, or nullptr if key doesn't exist
+    BstNode* Search(int); // returns ptr to node with given key, or nullptr if key doesn't exist
     int* InOrder(); // returns ordered array of all elements
     
-    bst_node* GetRoot() { return root; }; // returns the root node of the tree
+    BstNode* GetRoot() { return root; }; // returns the root node of the tree
     int GetCount() { return CountRecur(root); }; // returns the number of nodes in the tree
 
 private:
-    bst_node* InsertRecur(bst_node*, int); // recursive insert
-    void InOrderRecur(bst_node* n, int arr[], int& i); // recursive inorder
-    int CountRecur(bst_node* n); // recursive counter
-    void DeleteRecur(bst_node* n); // recursive delete
+    BstNode* InsertRecur(BstNode*, int); // recursive insert
+    void InOrderRecur(BstNode* n, int arr[], int& i); // recursive inorder
+    int CountRecur(BstNode* n); // recursive counter
+    void DeleteRecur(BstNode* n); // recursive delete
 
-    bst_node* GetParent(int); // returns parent of given node
-    bst_node* NewNode(int); // creates a new node
+    BstNode* GetParent(int); // returns parent of given node
+    BstNode* NewNode(int); // creates a new node
 
-    bst_node* root{ nullptr }; // topmost node in tree
+    BstNode* root{ nullptr }; // topmost node in tree
 };
 
-bst_node* bst::Insert(int k)
+BstNode* Bst::Insert(int k)
 {
     if (root == nullptr)
     {
@@ -56,7 +56,7 @@ bst_node* bst::Insert(int k)
     return InsertRecur(root, k);
 }
 
-bst_node* bst::InsertRecur(bst_node* n, int k)
+BstNode* Bst::InsertRecur(BstNode* n, int k)
 {   
     if (n == nullptr)
         return NewNode(k); 
@@ -73,9 +73,9 @@ bst_node* bst::InsertRecur(bst_node* n, int k)
     return n;   
 }
 
-bst_node* bst::Search(int k)
+BstNode* Bst::Search(int k)
 {
-    bst_node* node = root;
+    BstNode* node = root;
 
     while (node != nullptr)
     {
@@ -91,16 +91,16 @@ bst_node* bst::Search(int k)
     return nullptr;
 }
 
-void bst::Delete(int k)
+void Bst::Delete(int k)
 {
     if (root == nullptr)
         return;
 
-    bst_node* rm_node = Search(k);
+    BstNode* rm_node = Search(k);
 
     if (rm_node->left != nullptr && rm_node->right != nullptr) // both subtrees case
     {
-        bst_node* successor = rm_node->right;
+        BstNode* successor = rm_node->right;
 
         while (successor->left != nullptr)
             successor = successor->left; // min of right subtree
@@ -113,7 +113,7 @@ void bst::Delete(int k)
         return;
     }
 
-    bst_node* parent = GetParent(rm_node->key);
+    BstNode* parent = GetParent(rm_node->key);
 
     if (rm_node->left == nullptr && rm_node->right == nullptr) // leaf case
         k < parent->key ? parent->left = nullptr : parent->right = nullptr;
@@ -128,10 +128,10 @@ void bst::Delete(int k)
     return;
 }
 
-bst_node* bst::GetParent(int k)
+BstNode* Bst::GetParent(int k)
 {
-    bst_node* node = root;
-    bst_node* parent{};
+    BstNode* node = root;
+    BstNode* parent{};
 
     while (node != nullptr)
     {
@@ -154,7 +154,7 @@ bst_node* bst::GetParent(int k)
     return nullptr;
 }
 
-int* bst::InOrder()
+int* Bst::InOrder()
 {
     if (root == nullptr)
         return nullptr;
@@ -181,7 +181,7 @@ int* bst::InOrder()
     return arr;
 }
 
-void bst::InOrderRecur(bst_node* n, int arr[], int& i)
+void Bst::InOrderRecur(BstNode* n, int arr[], int& i)
 {
     arr[i] = n->key;
     i++;
@@ -193,7 +193,7 @@ void bst::InOrderRecur(bst_node* n, int arr[], int& i)
         InOrderRecur(n->right, arr, i);
 }
 
-int bst::CountRecur(bst_node* n)
+int Bst::CountRecur(BstNode* n)
 {
     if (n == nullptr)
         return 0;
@@ -204,7 +204,7 @@ int bst::CountRecur(bst_node* n)
     return total;
 }
 
-void bst::DeleteRecur(bst_node* n)
+void Bst::DeleteRecur(BstNode* n)
 {
     if (n->left)
         DeleteRecur(n->left);
@@ -215,8 +215,8 @@ void bst::DeleteRecur(bst_node* n)
     delete n;
 }
 
-bst_node* bst::NewNode(int k)
+BstNode* Bst::NewNode(int k)
 {
-    bst_node* node = new bst_node(k);
+    BstNode* node = new BstNode(k);
     return node;
 }

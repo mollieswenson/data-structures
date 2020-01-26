@@ -5,11 +5,11 @@
 #include <vld.h>
 #include "binary-search-tree.h"
 
-void Print(bst_node*);
+void Print(BstNode*);
 
 int test_bst()
 {
-    bst tree;
+    Bst tree;
 
     tree.Insert(7);  // 1
     tree.Insert(0);  // 2
@@ -68,7 +68,7 @@ int test_bst()
 
     delete keys;
 
-    bst huge;
+    Bst huge;
 
     for (int i = 100; i < 200; i++) // add 0 - 299 out of order
         huge.Insert(i);
@@ -84,13 +84,13 @@ int test_bst()
         assert(huge.Search(i)->key == keys[i]); // keys in expected order
     delete keys;
 
-    bst empty;
+    Bst empty;
 
     return 0;
 }
 
 
-void Print(bst_node* n) // for debugging
+void Print(BstNode* n) // for debugging
 {
     if (n)
     {
