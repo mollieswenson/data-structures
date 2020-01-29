@@ -5,10 +5,6 @@
 
 #include <vld.h>
 
-#include "test-red-black-tree.h" // temp
-
-enum Direction { LEFT, RIGHT };
-
 enum Color { RED, BLACK };
 
 struct RbtNode 
@@ -17,47 +13,16 @@ struct RbtNode
     ~RbtNode() { };
 
     int key{};
-
-	//bool red{ true };
-
 	Color color = RED ;
 
     RbtNode* left{ nullptr };
     RbtNode* right{ nullptr };
-
 	RbtNode* parent{ nullptr };
 
-	RbtNode* GetGrandParent()
-	{
-		if (parent && parent->parent)
-			return parent->parent;
-
-		return nullptr;
-	}
-
-	RbtNode* GetSibling()
-	{
-		if (this == parent->left)
-			return parent->right;
-		else
-			return parent->left;
-	}
-
-	RbtNode* GetUncle()
-	{ 
-		if (parent && parent->parent)
-		{
-			if (parent->parent->left == parent && parent->parent->right != nullptr)
-				return parent->parent->right;
-
-			if (parent->parent->right == parent && parent->parent->left != nullptr)
-				return parent->parent->left;
-		}
-
-		return nullptr;
-	}
+    RbtNode* GetSibling(); // return ptr to sibling
+    RbtNode* GetUncle(); // returns ptr to uncle of this node
+    RbtNode* GetGrandParent(); // returns ptr to grandparent of this node
 };
-
 
 class Rbt
 {
@@ -73,24 +38,17 @@ public:
 	RbtNode* GetRoot() { return root; }; // returns the root node of the tree
 	int GetCount() { return CountRecur(root); }; // returns the number of nodes in the tree
 
-
-	void RotateColor(RbtNode* n);
+    RbtNode* GetParent(int); // returns parent of given node
 
 private:
 	RbtNode* InsertRecur(RbtNode* n, RbtNode* p, int k); // recursive insert
+    void RotateColorRecur(RbtNode* n); // recursive recolor and rotate
+    void DeleteRecur(RbtNode* n); // recursive delete
+
 	void InOrderRecur(RbtNode* n, int arr[], int& i); // recursive inorder
 	int CountRecur(RbtNode* n); // recursive counter
-	void DeleteRecur(RbtNode* n); // recursive delete
-
-	void Check(RbtNode* n);
-
-	void Rotate(RbtNode*);
-	void Recolor(RbtNode*);
-
-	RbtNode* GetParent(int); // returns parent of given node
+	
 	RbtNode* NewNode(RbtNode* p, int k); // creates a new node
-
-
 
 	RbtNode* root{ nullptr }; // topmost node in tree
 };
@@ -124,168 +82,99 @@ RbtNode* Rbt::Insert(int k)
 		}
 	}
 
-	node = NewNode(parent, k); // is node already in this spot? 
+	node = NewNode(parent, k);
 
 	if (node->parent->color == RED)
 	{
-		RotateColor(node);
+		RotateColorRecur(node);
 	}
-
-	
-
 	return node;
 }
 
-
-
-void Rbt::RotateColor(RbtNode* n) // null leafs are black!
+void Rbt::RotateColorRecur(RbtNode* n)
 {
-	if (n == root)
-		n->color = BLACK;
-
-	if (n->GetUncle() && n->GetUncle()->color != BLACK) // red uncle
+    if (n == root)
+        n->color = BLACK;
+	else if (n->color == RED && n->parent && n->parent->color == RED && n->GetUncle() && n->GetUncle()->color != BLACK) // red node and parent, non-black uncle
 	{
 		n->parent->color = BLACK;
 		n->GetUncle()->color = BLACK;
 		n->GetGrandParent()->color = RED;
 
-		RotateColor(n->GetGrandParent());
+		RotateColorRecur(n->parent->parent);
 	}
-	else if (n->GetUncle() == nullptr || n->GetUncle()->color == BLACK) // black uncle
-	{   // doesnt work on root.,. 
-		if (n != root && n == n->parent->left && n->GetGrandParent() != nullptr && n->GetGrandParent()->left == n->parent) // (LL) node is left child, parent is left child
-		{
-			n->parent->right = n->parent->parent; // gparent becomes n->parent's right child			
-			n->GetGrandParent()->parent->left = n->parent; // ggparent becomes gparent
+    else if (n->GetUncle() == nullptr || n->GetUncle()->color == BLACK) // black uncle
+    {
+        if (n != root && n->parent && n == n->parent->left && n->GetGrandParent() != nullptr && n->GetGrandParent()->left == n->parent) // LL case
+        {
+            RbtNode* temp = n->parent->right;
+            n->parent->right = n->parent->parent;
 
-			n->GetGrandParent()->left = nullptr; // remove left ch of gparent / now n->parent's right child
+            if(n->parent->parent->parent)
+                n->parent->parent->parent->left = n->parent; //
+        
+            if (n->parent->parent == root)
+                root = n->parent;
 
-			if (n->parent->parent == root) // if n's parent is now root, fix root ===== needed? 
-				root = n->parent;
+            n->parent->parent = n->parent->parent->parent;
+            n->parent->right->parent = n->parent;
 
-			n->parent->parent = n->GetGrandParent()->parent; // hook n->parent up to new predecessor (handles nullptr for root case)
-			n->GetSibling()->parent = n->parent; // hook sibling up to correct parent
-			n->GetSibling()->left = nullptr; // remove sibling right ch now pointing to its own parent
+            if (temp)
+                temp->parent = n->parent->right;
+            n->parent->right->left = temp;
 
-			n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED; // swap colors of parent and sibling (old gparent) 
-			n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
-		}
-		else if (n != root && n == n->parent->right && n->GetGrandParent() != nullptr && n->GetGrandParent()->left == n->parent) // (LR) node is right, parent is left 
-		{
-			n->left = n->parent; // parent becomes n's left child
-			n->parent = n->left->parent->parent; // hook n->parent up to new predecessor (handles nullptr for root case)
-			n->left->parent = n; // hook former parent up to new predecessor
+            n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+            n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
+        }
+        else if (n != root && n->parent && n == n->parent->right && n->GetGrandParent() != nullptr && n->GetGrandParent()->right == n->parent) // RR case
+        {
+            RbtNode* temp = n->parent->left;
+            n->parent->left = n->parent->parent;
 
-			RotateColor(n->left); // should hit LL case on next
+            if (n->parent->parent->parent)
+                n->parent->parent->parent->right = n->parent; // c
 
-		}
-		else if (n != root && n == n->parent->right && n->GetGrandParent() != nullptr && n->GetGrandParent()->right == n->parent) // RR
-		{
-			n->parent->left = n->parent->parent; // gparent becomes n->parent's left child
-			n->parent->parent->right = n; // n becomes n->parent's right child
-			if(n->GetGrandParent()->parent)
-				n->GetGrandParent()->parent->left = n->parent; // fix ptr to n->parent
+            if (n->parent->parent == root)
+                root = n->parent;               // changed from parent->parent
 
-			if (n->parent->parent == root) // if n's parent is now root, fix root
-				root = n->parent;
+            n->parent->parent = n->parent->parent->parent;
+            n->parent->left->parent = n->parent;
 
-			n->parent->parent = n->parent->parent->parent; // hook n->parent up to its parent (handles nullptr for root case)
-			n->GetSibling()->parent = n->parent; // hook new sibling up to correct parent
+            if (temp)
+                temp->parent = n->parent->left;
+            n->parent->left->right = temp;
 
-			n->GetSibling()->right = nullptr; // remove sibling right ch now pointing to its own parent
+            n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+            n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
+        }
+        else if (n != root && n->parent && n == n->parent->right && n->parent->parent != nullptr && n->parent->parent->left == n->parent) // LR case
+        {
+            n->left = n->parent;
+            n->parent = n->left->parent;
+            n->parent->left = n;
+            n->left->parent = n;
 
-			// under what circumstances do we swap colors? 
+            n->left->right = nullptr;
 
-			n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED; // swap colors of parent and sibling (old gparent) 
-			n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
-			
-		}
-		else if (n != root && n == n->parent->left && n->GetGrandParent() != nullptr && n->GetGrandParent()->right == n->parent) // RL (mirror LR)
-		{
-			n->right = n->parent; // parent becomes n's left child
-			n->GetGrandParent()->parent->right = n; // n becomes ggparent right ch
-			n->left = n->GetGrandParent(); // gparent becomes n's left ch
+            RotateColorRecur(n->left); // correct to rotate on? 
+        }
+        else if (n != root && n->parent && n == n->parent->left && n->parent->parent != nullptr && n->parent->parent->right == n->parent) // RL case
+        {
+            n->right = n->parent;
+            n->parent = n->right->parent;
+            n->parent->right = n;
+            n->right->parent = n;
 
-			n->parent->left = nullptr;
-			n->GetGrandParent()->right = nullptr;
+            n->right->left = nullptr;
 
-			n->parent = n->GetGrandParent()->parent; // hook n->parent up to new predecessor (handles nullptr for root case)
-			n->left->parent = n; // hook former parent up to new predecessor
-			n->right->parent = n; // hook former parent up to new predecessor
-
-			n->color = BLACK;
-			n->left->color = RED;
-
-
-
-
-
-			//RotateColor(n->right); 
-		}
-		else
-		{
-			assert(true);
-			return;
-		}
-
-	}
+            RotateColorRecur(n->right); // correct to rotate on? 
+        }
+        else
+            assert(true); // no color
+    }
 	else
-	{
 		return;
-	}
-
-
-
-
 }
-
-
-
-
-
-
-
-void Rbt::Rotate(RbtNode* n) 
-{
-	if (n->color == RED && n->parent->color == RED) // 2 consecutive red nodes, rotate opposite dir of n   *everything must stay in order*
-	{
-
-		if (n->parent->parent->right == n->parent && n->parent->right == n) // rotate gparent left; gparent becomes parent's left child (RR)
-			n->parent->left = n->parent->parent; // rotate gparent
-
-		if (n->parent->parent->left == n->parent && n->parent->left == n) // rotate gparent right; gparent becomes parent's right child (LL)
-			n->parent->right = n->parent->parent; // rotate gparent
-
-		if (n->parent->parent == root) // if n's parent is now root, fix root
-			root = n->parent; // update root
-
-		if (n->parent == n->parent->parent->left) // hook parent up to new child
-			n->parent->parent->left = nullptr;
-
-		if (n->parent == n->parent->parent->right) // hook parent up to new child
-			n->parent->parent->right = nullptr;
-
-		n->parent->parent = n->parent->parent->parent; // hook new parent up to predecessor; should handle nullptr for root case
-		
-		n->GetSibling()->parent = n->parent; // hook sibling up to correct parent
-
-		if (n->GetSibling()->left == n->parent)  // remove sibling child conn to new parent
-			n->GetSibling()->left = nullptr; 
-
-		if (n->GetSibling()->right == n->parent)  // remove sibling child conn to new parent
-			n->GetSibling()->right = nullptr;
-
-		n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;  // recolor sibling
-		n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;                   // recolor parent 
-
-		if (n->parent == root)
-			n->parent->color = BLACK;
-	}
-}
-
-void Rbt::Recolor(RbtNode* n) {}
-
-
 
 RbtNode* Rbt::NewNode(RbtNode* p, int k)
 {
@@ -304,151 +193,6 @@ RbtNode* Rbt::NewNode(RbtNode* p, int k)
 	return node;
 }
 
-
-// dont allow red root 
-// recursive balance up the tree..
-
-//void Rbt::Balance(RbtNode* n)
-//{
-//	// if there is no uncle, then uncle is BLACK
-//
-//	if (n->GetUncle() != nullptr && n->GetUncle()->color == RED && n->parent != nullptr && n->parent->color != BLACK) // case where n->uncle is red, n->parent is not black    
-//	{
-//		n->parent->color = BLACK;
-//		n->GetUncle()->color = BLACK; // uncle and parent to black
-//
-//		if (n->GetGrandParent() != nullptr)
-//		{
-//			n->GetGrandParent()->color = RED;  // g-parent to red
-//
-//			if(n == n->parent->left) // rotate g-parent opposite dir of par-node conn
-//				Rotate(n->GetGrandParent(), RIGHT);
-//			if (n == n->parent->right)
-//				Rotate(n->GetGrandParent(), LEFT); // something wrong here
-//
-//			Balance(n); // recurse on new n (is n pointing to former gparent now?)
-//		}
-//
-//	}
-//
-//}
-//
-//RbtNode* Rbt::Rotate(RbtNode*n, Direction d)
-//{
-//	if (n->GetGrandParent() == nullptr)
-//		return nullptr;
-//
-//
-//	if (n->parent && n->parent->right && d == LEFT) // we already know n->right and n->right->right exist
-//	{
-//		n->parent->left = n->right; // fix top level left child ptr
-//
-//		n->right->parent = n->parent;   // set parent ptr of n's right child ( rc is future parent of n) to current parent of n
-//		n->parent = n->right;           // set parent ptr of n to n's current right child (rc is future parent of n)
-//		if(n->right->left)
-//			n->right->left->parent = n; // (fixup) if it exists, set parent ptr of r/l grandchild to n
-//
-//		RbtNode* temp = n->right->left;
-//
-//		n->right->left = n; // hook new parent up to new child
-//		n->right = temp; // hook old parent up to new child
-//	}
-//
-//	if (n->parent && n->parent->right && d == RIGHT) // we already know n->left and n->left->left exist
-//	{
-//		n->parent->right = n->left; // fix top level right child ptr
-//
-//		n->left->parent = n->parent; // set parent ptr of n's right child ( rc is future parent of n) to current parent of n
-//		n->parent = n->left;         // set parent ptr of n to n's current right child (rc is future parent of n)
-//		if (n->left->right)
-//			n->left->right->parent = n; // (fixup) if it exists, set parent ptr of r/l grandchild to n
-//
-//		RbtNode* temp = n->left->right;
-//
-//		n->left->right = n; // hook new parent up to new child
-//		n->left = temp; // hook old parent up to new child
-//	}
-//
-//	return nullptr;
-//}
-//
-
-
-
-
-
-//	if (n->GetUncle() != nullptr && n->GetUncle()->color == RED) // case with red uncle and non-black parent
-//	{
-//
-//		if (n->parent != nullptr && n->parent->color != BLACK)
-//		{
-//			n->GetUncle()->color = BLACK;
-//			n->parent->color = BLACK;  // should parent still be colored black if there is no uncle? 
-//
-//			if (n->GetGrandParent() != nullptr)
-//				n->GetGrandParent()->color = RED; // should g-parent parent still be colored black if there is no uncle? 
-//		}
-//	}
-//
-//
-//
-//
-//
-//	if (n->GetUncle() != nullptr && n->GetUncle()->color == RED && n->parent != nullptr && n->parent->color != BLACK && n->GetGrandParent() != nullptr) // case where n->uncle is red, n->parent is not black (change both to black)      
-//	{
-//		n->parent->color = BLACK;
-//		n->GetUncle()->color = BLACK;  // what should happen when one or more grandparent, uncle or parent doesn't exist? 
-//		n->GetGrandParent()->color = RED;
-//	}
-//
-//
-//
-//	if (n->GetUncle() == nullptr && n->parent != nullptr && n->parent->color != BLACK) // case with no uncle, n->parent is not black (what to do?)
-//	{
-//
-//	}
-//
-//
-//
-//	if (n->GetUncle() && n->GetUncle()->color == BLACK) // black uncle...
-//	{
-//		if (n->GetGrandParent()->left == n->parent && n->parent->right == n) // left -> right triangle case (rotate to left)
-//		{
-//			Rotate(n->parent, LEFT);
-//		}
-//
-//		if (n->GetGrandParent()->right == n->parent && n->parent->left == n) // right -> left triangle case (rotate to right)
-//		{
-//			Rotate(n->parent, RIGHT); // when to color? 
-//		}
-//
-//		if (n->GetGrandParent()->left == n->parent && n->parent->left == n) // left -> left line case
-//		{
-//
-//		}
-//
-//		if (n->GetGrandParent()->right == n->parent && n->parent->right == n) // right -> right line case
-//		{
-//
-//		}
-//	}
-//
-//
-//
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
 RbtNode* Rbt::InsertRecur(RbtNode* n, RbtNode* p, int k)
 {
 	if (n == nullptr)
@@ -465,102 +209,6 @@ RbtNode* Rbt::InsertRecur(RbtNode* n, RbtNode* p, int k)
 		
 	return n;
 }
-
-
-
-
-///////////////////////
-
-//void Rbt::Insert(int k)
-//{
-//	if (root == nullptr)
-//	{
-//		root = NewNode(nullptr, k);
-//		root->red = false;
-//		return;
-//	}
-//
-//	if (Search(k) != nullptr)
-//		return;
-//
-//	RbtNode* node = InsertRecur(root, nullptr, k);
-//
-//	//Balance(node);
-//	//Check(root);
-//}
-//
-//RbtNode* Rbt::InsertRecur(RbtNode* n, RbtNode* p, int k)
-//{
-//	if (n == nullptr)
-//		return NewNode(p, k);
-//
-//	if (k == n->key)
-//		return nullptr;
-//
-//	if (k < n->key)
-//		n->left = InsertRecur(n->left, n, k);
-//
-//	if (k > n->key)
-//		n->right = InsertRecur(n->right, n, k);
-//
-//	return n;
-//}
-
-void Rbt::Check(RbtNode* n)
-{
-	if (n == nullptr)
-		return;
-
-	// root and leaves are black
-	// red nodes only have black children (black nodes can have black children)
-	// all paths from a node to a dummy node/nullptr have the same number of black nodes
-
-	std::cout << "\n\n NODE " << n->key;;
-
-	if (n->color == RED)
-		std::cout << " red";
-	else
-		std::cout << " black";
-
-	if (n->left != nullptr && n->left->color == RED)
-		std::cout << "\n  red";
-	else
-		std::cout << "\n  black";
-
-	if (n->right != nullptr && n->right->color == RED)
-		std::cout << "\n  red";
-	else
-		std::cout << "\n  black";
-	
-
-
-	if (n->color == RED)
-	{
-		if (n->left != nullptr && n->left->color == BLACK)
-		{
-			std::cout << "\n   child " << n->left << " must be black!";
-		}
-
-		if (n->right != nullptr && n->right->color == BLACK)
-		{
-			std::cout << "\n   child " << n->right << " must be black!";
-		}
-	}
-
-
-
-	Check(n->left);
-	Check(n->right);
-}
-
-
-
-
-
-
-
-
-
 
 RbtNode* Rbt::Search(int k)
 {
@@ -705,4 +353,32 @@ void Rbt::DeleteRecur(RbtNode* n)
 	delete n;
 }
 
+RbtNode* RbtNode::GetSibling()
+{
+    if (this == parent->left)
+        return parent->right;
+    else
+        return parent->left;
+}
 
+RbtNode* RbtNode::GetUncle()
+{
+    if (parent && parent->parent)
+    {
+        if (parent->parent->left == parent && parent->parent->right != nullptr)
+            return parent->parent->right;
+
+        if (parent->parent->right == parent && parent->parent->left != nullptr)
+            return parent->parent->left;
+    }
+
+    return nullptr;
+}
+
+RbtNode* RbtNode::GetGrandParent()
+{
+    if (parent && parent->parent)
+        return parent->parent;
+
+    return nullptr;
+}
