@@ -16,8 +16,13 @@ int test_rbt()
     RbtNode* node{};
     Rbt c; 
 
-    for(int i = 1; i < 21; i++) // keys 1-20 in order
+    for (int i = 1; i < 21; i++) // keys 1-20 in order
+    {
+        std::cout << "\n    ... finished insert ";;
+        std::cout << "\n insert " << i;
         c.Insert(i);
+    }
+
 
     node = c.GetRoot();
     assert(node->key == 8); // expected root node
@@ -40,6 +45,27 @@ int test_rbt()
     assert(node->right == nullptr);
     assert(node->color == BLACK);
 
+    node = c.GetRoot()->right->right->right->left;
+    assert(node->key == 17);
+    assert(node->parent == c.Search(18));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = c.GetRoot()->right->right->right->right;
+    assert(node->key == 19);
+    assert(node->parent == c.Search(18));
+    assert(node->left == nullptr);
+    assert(node->right == c.Search(20));
+    assert(node->color == BLACK);
+
+    node = c.GetRoot()->right->right->right->right->right;
+    assert(node->key == 20);
+    assert(node->parent == c.Search(19));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
     node = c.GetRoot()->right->left;
     assert(node->key == 10);
     assert(node->parent == c.Search(12));
@@ -61,9 +87,13 @@ int test_rbt()
 
     Rbt a;  // insert some keys out of order
 
-    a.Insert(1);
-    a.Insert(32);
+    a.Insert(1);  // set root
+    a.Insert(32); // don't need to do anything.. 
     a.Insert(19);
+
+    std::cout << "\n\n ==================== ";
+    Print(a, a.GetRoot());
+
     a.Insert(15);
     a.Insert(65);
     a.Insert(24);
