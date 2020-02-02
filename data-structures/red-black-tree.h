@@ -25,13 +25,13 @@ struct RbtNode
     RbtNode* GetSibling(); // return ptr to sibling
     RbtNode* GetUncle(); // returns ptr to uncle of this node
     RbtNode* GetGrandParent(); // returns ptr to grandparent of this node
-    bool RedLeft() { return (left != nullptr && left->color == RED); }; // true if red
-    bool RedRight() { return (right != nullptr && right->color == RED); }; // true if red
+
     bool RedParent() { return (parent != nullptr && parent->color == RED); }; // true if red
-    bool RedUnlce(); // true if red
+    bool RedUncle(); // true when a red uncle exists, otherwise false
+	bool BlackUncle(); // true when a black uncle exists, otherwise false
+
     bool ParentIsLeftChild() { return (parent->parent != nullptr && parent->parent->left == parent); }; // true if parent is left child
     bool IsLeft() { return parent != nullptr && parent->left == this; };
-
 };
 
 class Rbt
@@ -52,18 +52,11 @@ public:
 
 private:
 	RbtNode* InsertRecur(RbtNode* n, RbtNode* p, int k); // recursive insert
-    void RotateColorRecur(RbtNode* n); // recursive recolor and rotate
+	void Rebalance(RbtNode* n);
     void DeleteRecur(RbtNode* n); // recursive delete
-
-
-    void RotateLeft(RbtNode* n);
-    void RotateRight(RbtNode* n);
-
 	void InOrderRecur(RbtNode* n, int arr[], int& i); // recursive inorder
 	int CountRecur(RbtNode* n); // recursive counter
-	
 	RbtNode* NewNode(RbtNode* p, int k); // creates a new node
-
 	RbtNode* root{ nullptr }; // topmost node in tree
 };
 
@@ -81,10 +74,10 @@ RbtNode* Rbt::Insert(int k)
 
 	while (node != nullptr) 
 	{
-		if (k == node->key) // node exists
+		if (k == node->key)
 			return nullptr;
 
-		if (k < node->key)  // traverse 
+		if (k < node->key) 
 		{
 			parent = node;
 			node = node->left;
@@ -97,127 +90,112 @@ RbtNode* Rbt::Insert(int k)
 	}
 
 	node = NewNode(parent, k);
-    RotateColorRecur(node);   // maintain RBT properties
-
+    Rebalance(node);
 	return node;
 }
 
-
-
-
-
-void Rbt::RotateColorRecur(RbtNode* n)
+void Rbt::Rebalance(RbtNode* n)
 {
-    // using https://www.cs.auckland.ac.nz/software/AlgAnim/red_black.html
+	n->color = RED;
 
-    n->color = RED;
+	while (n != root && n->RedParent())
+	{
+		if (n->RedUncle())// red uncle.. 
+		{
+			n->parent->color = BLACK;
+			n->parent->parent->color = RED;
+			n->GetUncle()->color = BLACK;
+			n = n->parent->parent;
+		}
+		else
+		{
+			if (n->ParentIsLeftChild() && !n->IsLeft()) // LR
+			{
+				RbtNode* l = n->left;
 
-    while ((n != root) && n->RedParent()) // non-root with red parent.. 
-    {
-        if (n->ParentIsLeftChild()) // ..left parent..
-        {
-            if (n->RedUnlce()) // ..red uncle          (case 1)
-            {
-                n->parent->color = BLACK;
-                n->GetUncle()->color = BLACK;
-                n->GetGrandParent()->color = RED; // what if there is no gparent? 
-                n = n->GetGrandParent();
-            }
-            else // black uncle..
-            {
-                if (!n->IsLeft())  // ..n is parent's right ch (case 2)
-                {
-                    n = n->parent;
-                    RotateLeft(n);
-                }
-                n->parent->color = BLACK;              // (case 3)
-                if (n->GetGrandParent())
-                {
-                    n->GetGrandParent()->color = RED;
-                    RotateRight(n->GetGrandParent());
-                }
-            }
-        }
-        else // .. parent is right child..
-        {
-            if (n->RedUnlce()) // ..red uncle          (case 1)
-            {
-                n->parent->color = BLACK;
-                n->GetUncle()->color = BLACK;
-                n->GetGrandParent()->color = RED; // what if there is no gparent? 
-                n = n->GetGrandParent();
-            }
-            else // black uncle..
-            {
-                if (n->IsLeft())  // ..n is parent's right ch (case 2)
-                {
-                    n = n->parent;
-                    RotateRight(n);
-                }
-                n->parent->color = BLACK;              // (case 3)
-                if (n->GetGrandParent())
-                {
-                    n->GetGrandParent()->color = RED;
-                    RotateLeft(n->GetGrandParent());
-                }
+				n->left = n->parent;
+				n->parent = n->left->parent;
 
-            }
-        }
+				n->parent->left = n;
+				n->left->parent = n;
 
-        root->color == BLACK;
-        // root = n? 
-    }
+				n->left->right = l;
+				n = n->left;
+			}
+			else if (!n->ParentIsLeftChild() && n->IsLeft()) // RL
+			{
+				RbtNode* r = n->right;
+
+				n->right = n->parent;
+				n->parent = n->right->parent;
+
+				n->parent->right = n;
+				n->right->parent = n;
+
+				n->right->left = r;
+
+				n = n->right;
+			}
+			else if (n->ParentIsLeftChild() && n->IsLeft()) // LL
+			{
+				assert(n->parent != root); 
+				RbtNode* temp = n->parent->right;
+
+				if (n->parent->parent == root)
+					root = n->parent;
+				else
+				{
+					if (n->parent->parent->parent->key < n->parent->key)
+						n->parent->parent->parent->right = n->parent;
+					else
+						n->parent->parent->parent->left = n->parent;
+				}
+
+				n->parent->right = n->parent->parent;
+				n->parent->parent = n->parent->parent->parent;
+
+				n->parent->right->parent = n->parent;
+				n->parent->right->left = temp;
+
+				if (temp)
+					temp->parent = n->parent->right;
+
+				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
+			}
+			else if (!n->ParentIsLeftChild() && !n->IsLeft()) // RR
+			{
+				assert(n->parent != root);
+				RbtNode* temp = n->parent->left;
+
+				if (n->parent->parent == root)
+					root = n->parent;
+				else
+				{
+					if (n->parent->parent->parent->key < n->parent->key)
+						n->parent->parent->parent->right = n->parent;
+					else
+						n->parent->parent->parent->left = n->parent;
+				}
+
+				n->parent->left = n->parent->parent;
+				n->parent->parent = n->parent->parent->parent; // handles null
+
+				n->parent->left->parent = n->parent;
+				n->parent->left->right = temp;
+
+				if (temp)
+					temp->parent = n->parent->left;
+
+				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
+			}
+		}
+	}
+
+	if (n == root)
+		n->color = BLACK;
 }
-
-void Rbt::RotateLeft(RbtNode* n)
-{
-    RbtNode* temp = n->right; 
-
-    n->right = temp->left; // #1
-    if (temp->left != nullptr)
-        temp->left->parent = n; // #2
-
-    temp->parent = n->parent; // #3
-
-    if (n->parent == nullptr)
-        root = temp; // # 4
-    else
-    {
-        if (n->IsLeft())
-            n->parent->left = temp; // #5
-        else
-            n->parent->right = temp;  // #5
-    }
-
-    temp->left = n;  // #6
-    n->parent = temp; // #7
-}
-
-void Rbt::RotateRight(RbtNode* n)
-{
-    RbtNode* temp = n->right;
-    n->right = temp->right; // #1
-
-    if (temp->right != nullptr)
-        temp->right->parent = n; // #2
-
-    temp->parent = n->parent; // #3
-
-    if (n->parent == nullptr)
-        root = temp;
-    else
-    {
-        if (n->IsLeft())
-            n->parent->right = temp;
-        else
-            n->parent->left = temp;
-            
-    }
-
-    temp->left = n;
-    n->parent = temp;
-}
-  
 
 RbtNode* Rbt::NewNode(RbtNode* p, int k)
 {
@@ -228,7 +206,7 @@ RbtNode* Rbt::NewNode(RbtNode* p, int k)
 		node->parent = p;
 
 		if (k < p->key)
-			p->left = node; // parent's ptr
+			p->left = node; 
 		else
 			p->right = node;
 	}
@@ -271,12 +249,19 @@ RbtNode* Rbt::Search(int k)
 	return nullptr;
 }
 
+
+
+
+
 void Rbt::Delete(int k)
 {
 	if (root == nullptr)
 		return;
 
 	RbtNode* rm_node = Search(k);
+	
+	if (!rm_node)
+		return;
 
 	if (rm_node->left != nullptr && rm_node->right != nullptr) // both subtrees case
 	{
@@ -290,10 +275,13 @@ void Rbt::Delete(int k)
 
 		rm_node->key = successor->key;
 		delete successor;
-		return;
+
 	}
 
 	RbtNode* parent = GetParent(rm_node->key);
+
+	if (!parent)
+		return;
 
 	if (rm_node->left == nullptr && rm_node->right == nullptr) // leaf case
 		k < parent->key ? parent->left = nullptr : parent->right = nullptr;
@@ -418,19 +406,36 @@ RbtNode* RbtNode::GetUncle()
     return nullptr;
 }
 
-bool RbtNode::RedUnlce()
+bool RbtNode::RedUncle()
 {
-    if (parent && parent->parent)
-    {
-        if (parent->parent->left == parent && parent->parent->right != nullptr)
-            return parent->parent->right->color == RED;
+	if (parent && parent->parent)
+	{
+		if (parent->parent->left == parent && parent->parent->right != nullptr)
+			return parent->parent->right->color == RED;
 
-        if (parent->parent->right == parent && parent->parent->left != nullptr)
-            return parent->parent->left->color == RED;
-    }
+		if (parent->parent->right == parent && parent->parent->left != nullptr)
+			return parent->parent->left->color == RED;
+	}
 
-    return false;
+	return false; // no parent or gparent
 }
+
+bool RbtNode::BlackUncle()
+{
+	if (parent && parent->parent)
+	{
+		if (parent->parent->left == parent && parent->parent->right != nullptr)
+			return parent->parent->right->color == BLACK;
+
+		if (parent->parent->right == parent && parent->parent->left != nullptr)
+			return parent->parent->left->color == BLACK;
+	}
+
+	return false; // no parent or gparent
+}
+
+
+
 
 RbtNode* RbtNode::GetGrandParent()
 {
