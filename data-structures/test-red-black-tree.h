@@ -13,11 +13,397 @@ int test_rbt()
 {
 	
 	// use to verify structure: https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
+	// 
     RbtNode* node{};
+
+    Rbt a;  // insert some keys out of order
+
+    a.Insert(9);
+    a.Insert(32);
+    a.Insert(19); // RL, RR
+    a.Insert(6);  // recolor
+    a.Insert(7);  // LR, LL
+    a.Insert(42);
+    a.Insert(66); // RR
+    a.Insert(39); // recolor
+    a.Insert(29);
+    a.Insert(12); // recolor
+    a.Insert(25); // recolor, recolor
+    a.Insert(22); // LL
+
+    // check inserts so far...
+
+    node = a.GetRoot();
+    assert(node->key == 19); // expected root node
+    assert(node->parent == nullptr); // expected parent
+    assert(node->left == a.Search(7)); // expected left
+    assert(node->right == a.Search(42)); // expected right
+    assert(node->color == BLACK); // expected color
+
+    node = a.GetRoot()->left;
+    assert(node->key == 7);
+    assert(node->parent == a.Search(19));
+    assert(node->left == a.Search(6));
+    assert(node->right == a.Search(9));
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->left->left;
+    assert(node->key == 6);
+    assert(node->parent == a.Search(7));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->left->right;
+    assert(node->key == 9);
+    assert(node->parent == a.Search(7));
+    assert(node->left == nullptr);
+    assert(node->right == a.Search(12));
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->left->right->right;
+    assert(node->key == 12);
+    assert(node->parent == a.Search(9));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+    node = a.GetRoot()->right;  // right subtree
+    assert(node->key == 42);
+    assert(node->parent == a.Search(19));
+    assert(node->left == a.Search(32));
+    assert(node->right == a.Search(66));
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->right->left;
+    assert(node->key == 32);
+    assert(node->parent == a.Search(42));
+    assert(node->left == a.Search(25));
+    assert(node->right == a.Search(39));
+    assert(node->color == RED);
+
+    node = a.GetRoot()->right->left->left;
+    assert(node->key == 25);
+    assert(node->parent == a.Search(32));
+    assert(node->left == a.Search(22));
+    assert(node->right == a.Search(29));
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->right->left->left->left;
+    assert(node->key == 22);
+    assert(node->parent == a.Search(25));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+    node = a.GetRoot()->right->left->left->right;
+    assert(node->key == 29);
+    assert(node->parent == a.Search(25));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+    node = a.GetRoot()->right->left->right;
+    assert(node->key == 39);
+    assert(node->parent == a.Search(32));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->right->right;
+    assert(node->key == 66);
+    assert(node->parent == a.Search(42));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    a.Insert(30); // insert some more numbers
+    a.Insert(31);
+    a.Insert(24);
+    a.Insert(37);
+    a.Insert(38);
+    a.Insert(77);
+    a.Insert(88);
+    a.Insert(90);
+    a.Insert(89);
+    a.Insert(91);
+
+    node = a.GetRoot()->right;
+    assert(node->key == 32);
+    assert(node->parent == a.Search(19));
+    assert(node->left == a.Search(25));
+    assert(node->right == a.Search(77));
+    assert(node->color == RED);
+
+    node = a.GetRoot()->right->left->right;
+    assert(node->key == 30);
+    assert(node->parent == a.Search(25));
+    assert(node->left == a.Search(29));
+    assert(node->right == a.Search(31));
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->right->right;
+    assert(node->key == 77);
+    assert(node->parent == a.Search(32));
+    assert(node->left == a.Search(42));
+    assert(node->right == a.Search(89));
+    assert(node->color == BLACK);
+
+    node = a.GetRoot()->right->right->right;
+    assert(node->key == 89);
+    assert(node->parent == a.Search(77));
+    assert(node->left == a.Search(88));
+    assert(node->right == a.Search(90));
+    assert(node->color == RED);
+
+    node = a.GetRoot()->right->right->right->right->right;
+    assert(node->key == 91);
+    assert(node->parent == a.Search(90));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+    std::cout << "\n\n ==================== "; // is this right? 
+    Print(a, a.GetRoot());
+
+    a.Insert(30); // insert some more numbers
+    a.Insert(31);
+    a.Insert(24);
+    a.Insert(37);
+    a.Insert(38);
+    a.Insert(77);
+    a.Insert(88);
+    a.Insert(90);
+    a.Insert(89);
+    a.Insert(91);
+    
+    Rbt b;
+
+    b.Insert(40);
+    b.Delete(40); //case where root is only node
+    assert(b.GetRoot() == nullptr);
+
+    b.Insert(40);
+    b.Insert(30);
+    b.Insert(20);
+    b.Insert(10);
+    b.Delete(10); // case where node to delete is a left leaf (null successor is black by default)
+
+    node = b.GetRoot();
+    assert(node->key == 30); // expected root node
+    assert(node->parent == nullptr); // expected parent
+    assert(node->left == b.Search(20)); // expected left
+    assert(node->right == b.Search(40)); // expected right
+    assert(node->color == BLACK); // expected color
+
+    node = b.GetRoot()->left;
+    assert(node->key == 20);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Insert(50); 
+    b.Delete(50); // mirror of previous case (right)
+
+    node = b.GetRoot();
+    assert(node->key == 30);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(20));
+    assert(node->right == b.Search(40));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 40);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Delete(20); // previous case where delete is 1 below root
+
+    node = b.GetRoot();
+    assert(node->key == 30);
+    assert(node->parent == nullptr);
+    assert(node->left == nullptr);
+    assert(node->right == b.Search(40));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 40);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+    b.Insert(20);
+    b.Insert(10);
+    b.Insert(40);
+    b.Delete(20); // case where node to delete and/or predecessor is red (left)
+
+    node = b.GetRoot();
+    assert(node->key == 30);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(10));
+    assert(node->right == b.Search(40));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->left;
+    assert(node->key == 10);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Insert(50);
+    b.Delete(40); // previous case mirrored (right)
+
+    node = b.GetRoot();
+    assert(node->key == 30);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(10));
+    assert(node->right == b.Search(50));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 50);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Delete(10);
+    b.Delete(50);
+    b.Insert(20);
+    b.Insert(40);
+    b.Insert(35);
+
+    /// Rotate cases (sibling is black, at least one if sibling's chilren is red)
+
+    b.Delete(20); // RL
+
+    node = b.GetRoot();
+    assert(node->key == 35);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(30));
+    assert(node->right == b.Search(40));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->left;
+    assert(node->key == 30);
+    assert(node->parent == b.Search(35));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 40);
+    assert(node->parent == b.Search(35));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Insert(25);
+    b.Delete(40); // LR
+
+    node = b.GetRoot();
+    assert(node->key == 30);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(25));
+    assert(node->right == b.Search(35));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->left;
+    assert(node->key == 25);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 35);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Delete(25);
+    b.Delete(35);
+    b.Insert(20); 
+    b.Insert(40);
+    b.Insert(35);
+    b.Insert(50);
+
+    b.Delete(20); // RR
+
+    node = b.GetRoot();
+    assert(node->key == 40);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(30));
+    assert(node->right == b.Search(50));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->left;
+    assert(node->key == 30);
+    assert(node->parent == b.Search(40));
+    assert(node->left == nullptr);
+    assert(node->right == b.Search(35));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->left->right;
+    assert(node->key == 35);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 50);
+    assert(node->parent == b.Search(40));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    b.Insert(25);
+    b.Delete(50); // LL
+
+    node = b.GetRoot();
+    assert(node->key == 30);
+    assert(node->parent == nullptr);
+    assert(node->left == b.Search(25));
+    assert(node->right == b.Search(40));
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->left;
+    assert(node->key == 25);
+    assert(node->parent == b.Search(30));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right;
+    assert(node->key == 40);
+    assert(node->parent == b.Search(30));
+    assert(node->left == b.Search(35));
+    assert(node->right == nullptr);
+    assert(node->color == BLACK);
+
+    node = b.GetRoot()->right->left;
+    assert(node->key == 35);
+    assert(node->parent == b.Search(40));
+    assert(node->left == nullptr);
+    assert(node->right == nullptr);
+    assert(node->color == RED);
+
+
+
+    // TODO: DELETE SOME STUFF OUT OUT a TREE
+
+
+
+
+
     Rbt c;
-
-
-
 
     for (int i = 1; i < 21; i++) // keys 1-20 in order
         c.Insert(i);
@@ -80,168 +466,14 @@ int test_rbt()
 
      //Print(c, c.GetRoot());
 
-    Rbt a;  // insert some keys out of order
-
-    a.Insert(9);
-    a.Insert(32);
-	a.Insert(19); // RL, RR
-	a.Insert(6);  // recolor
-	a.Insert(7);  // LR, LL
-	a.Insert(42);
-	a.Insert(66); // RR
-	a.Insert(39); // recolor
-	a.Insert(29); 
-	a.Insert(12); // recolor
-	a.Insert(25); // recolor, recolor
-	a.Insert(22); // LL
-	
-	// check inserts so far...
-
-	node = a.GetRoot(); 
-	assert(node->key == 19); // expected root node
-	assert(node->parent == nullptr); // expected parent
-	assert(node->left == a.Search(7)); // expected left
-	assert(node->right == a.Search(42)); // expected right
-	assert(node->color == BLACK); // expected color
-
-	node = a.GetRoot()->left;
-	assert(node->key == 7);
-	assert(node->parent == a.Search(19));
-	assert(node->left == a.Search(6));
-	assert(node->right == a.Search(9));
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->left->left;
-	assert(node->key == 6);
-	assert(node->parent == a.Search(7));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->left->right;
-	assert(node->key == 9);
-	assert(node->parent == a.Search(7));
-	assert(node->left == nullptr);
-	assert(node->right == a.Search(12));
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->left->right->right;
-	assert(node->key == 12);
-	assert(node->parent == a.Search(9));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == RED);
-
-	node = a.GetRoot()->right;  // right subtree
-	assert(node->key == 42);
-	assert(node->parent == a.Search(19));
-	assert(node->left == a.Search(32));
-	assert(node->right == a.Search(66));
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->right->left;
-	assert(node->key == 32);
-	assert(node->parent == a.Search(42));
-	assert(node->left == a.Search(25));
-	assert(node->right == a.Search(39));
-	assert(node->color == RED);
-
-	node = a.GetRoot()->right->left->left;
-	assert(node->key == 25);
-	assert(node->parent == a.Search(32));
-	assert(node->left == a.Search(22));
-	assert(node->right == a.Search(29));
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->right->left->left->left;
-	assert(node->key == 22);
-	assert(node->parent == a.Search(25));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == RED);
-
-	node = a.GetRoot()->right->left->left->right;
-	assert(node->key == 29);
-	assert(node->parent == a.Search(25));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == RED);
-
-	node = a.GetRoot()->right->left->right;
-	assert(node->key == 39);
-	assert(node->parent == a.Search(32));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->right->right;
-	assert(node->key == 66);
-	assert(node->parent == a.Search(42));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == BLACK);
-
-	a.Insert(30); // insert some more numbers
-	a.Insert(31);
-	a.Insert(24);
-	a.Insert(37);
-	a.Insert(38);
-	a.Insert(77);
-	a.Insert(88);
-	a.Insert(90);
-	a.Insert(89);
-	a.Insert(91);
-
-	node = a.GetRoot()->right;
-	assert(node->key == 32);
-	assert(node->parent == a.Search(19));
-	assert(node->left == a.Search(25));
-	assert(node->right == a.Search(77));
-	assert(node->color == RED);
-
-	node = a.GetRoot()->right->left->right;
-	assert(node->key == 30);
-	assert(node->parent == a.Search(25));
-	assert(node->left == a.Search(29));
-	assert(node->right == a.Search(31));
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->right->right;
-	assert(node->key == 77);
-	assert(node->parent == a.Search(32));
-	assert(node->left == a.Search(42));
-	assert(node->right == a.Search(89));
-	assert(node->color == BLACK);
-
-	node = a.GetRoot()->right->right->right;
-	assert(node->key == 89);
-	assert(node->parent == a.Search(77));
-	assert(node->left == a.Search(88));
-	assert(node->right == a.Search(90));
-	assert(node->color == RED);
-
-	node = a.GetRoot()->right->right->right->right->right;
-	assert(node->key == 91);
-	assert(node->parent == a.Search(90));
-	assert(node->left == nullptr);
-	assert(node->right == nullptr);
-	assert(node->color == RED);
-
-
-
-	//a.Delete(9); // delete some nodes
-	a.Delete(77);
-
-
-
-	std::cout << "\n\n ==================== ";
-	Print(a, a.GetRoot());
+  
 
 	return 0;
 }
 
 void PrintKeys(Rbt& tree) // for debugging
 {
+
     int* keys = tree.InOrder();
     for (int i = 0; i < tree.GetCount(); i++)
         std::cout << "\n " << keys[i];
@@ -276,6 +508,13 @@ void PrintWarnings(Rbt& tree, RbtNode* node) // for debugging
 
 void Print(Rbt& tree, RbtNode* node) // for debugging
 {
+    if (tree.GetRoot() == nullptr)
+    {
+        std::cout << "\n\n EMPTY TREE";
+        return;
+    }
+        
+
 	std::cout << "\n\n NODE " << node->key;
 
 	if (node->color == RED)

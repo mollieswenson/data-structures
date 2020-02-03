@@ -1,3 +1,2 @@
 ﻿  data-structures.cpp
-c:\users\morrie\desktop\repos\data-structures\data-structures\red-black-tree.h(421): warning C4553: '==': result of expression not used; did you intend '='?
-  data-structures.vcxproj -> C:\Users\Morrie\Desktop\Repos\data-structures\x64\Debug\data-structures.exe
+  data-structures.vcxproj -> C:\Users\mswenson\Desktop\data-structures\x64\Debug\data-structures.exe
