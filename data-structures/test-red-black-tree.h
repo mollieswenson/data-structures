@@ -14,7 +14,10 @@ int test_rbt()
 	
 	// use to verify structure: https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
     RbtNode* node{};
-    Rbt c; 
+    Rbt c;
+
+
+
 
     for (int i = 1; i < 21; i++) // keys 1-20 in order
         c.Insert(i);
@@ -224,7 +227,12 @@ int test_rbt()
 	assert(node->right == nullptr);
 	assert(node->color == RED);
 
-	//a.Delete(30); // delete some node
+
+
+	//a.Delete(9); // delete some nodes
+	a.Delete(77);
+
+
 
 	std::cout << "\n\n ==================== ";
 	Print(a, a.GetRoot());

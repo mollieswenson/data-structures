@@ -5,7 +5,7 @@
 
 #include <vld.h>
 
-enum Color { RED, BLACK };
+enum Color { RED, BLACK, DOUBLE_BLACK };
 
 
 // support search(tree, key), Predecessor(tree, key), Successor(tree, key),Max(tree), Min(tree) in O(log n) time and explain how
@@ -13,7 +13,7 @@ enum Color { RED, BLACK };
 struct RbtNode 
 {
     RbtNode(int k) : key(k) {};
-    ~RbtNode() { };
+    ~RbtNode() { }; // if this has children/parents fix them? 
 
     int key{};
 	Color color = RED ;
@@ -27,8 +27,12 @@ struct RbtNode
     RbtNode* GetGrandParent(); // returns ptr to grandparent of this node
 
     bool RedParent() { return (parent != nullptr && parent->color == RED); }; // true if red
+	bool RedChild(); // true if either child is red, false if both chilred are black or if there are no children 
     bool RedUncle(); // true when a red uncle exists, otherwise false
 	bool BlackUncle(); // true when a black uncle exists, otherwise false
+
+	RbtNode* FirstRedChild();
+	bool TwoRedChild(); // true when a black uncle exists, otherwise false
 
     bool ParentIsLeftChild() { return (parent->parent != nullptr && parent->parent->left == parent); }; // true if parent is left child
     bool IsLeft() { return parent != nullptr && parent->left == this; };
@@ -255,48 +259,276 @@ RbtNode* Rbt::Search(int k)
 
 void Rbt::Delete(int k)
 {
-	if (root == nullptr)
-		return;
-
 	RbtNode* rm_node = Search(k);
-	
-	if (!rm_node)
-		return;
+	RbtNode* successor = nullptr;
 
-	if (rm_node->left != nullptr && rm_node->right != nullptr) // both subtrees case
+	// assuming tree exists and we are not deleting root for now.. 
+
+	if (rm_node->left == nullptr && rm_node->right == nullptr) // leaf case, no children
 	{
-		RbtNode* successor = rm_node->right;
-
-		while (successor->left != nullptr)
-			successor = successor->left; // min of right subtree
-
-		// case where removing root and min of right subtree is root->right
-		successor == root->right ? root->right = nullptr : GetParent(successor->key)->left = nullptr;
+		successor = nullptr;
+	}
+	else if (rm_node->left != nullptr && rm_node->right != nullptr) // both children
+	{
+		successor = rm_node->left;
+		while (successor->right != nullptr)
+			successor = successor->right;
 
 		rm_node->key = successor->key;
-		delete successor;
+
+		// successor must be a leaf.. 
+
+		// remove successor.. 
+
+		if (successor->IsLeft())
+			successor->parent->left = nullptr;
+		else
+			successor->parent->right = nullptr;
+
+		// if successor is black, will get double black a bit later.. 
+
+
+
+	}
+	else if (rm_node->left != nullptr || rm_node->right != nullptr)     // one child
+	{
+		if (rm_node->left)
+			successor = rm_node->left;
+		else
+			successor = rm_node->right;
+
+		rm_node->key = successor->key;
 
 	}
 
-	RbtNode* parent = GetParent(rm_node->key);
 
-	if (!parent)
-		return;
+	if (rm_node->color == RED || (successor && successor->color == RED))  // one or both of rm/succ is red
+	{
+		rm_node->color = BLACK;
+	}
+	else if ((rm_node->color == BLACK && successor->color == BLACK) || (rm_node->color == BLACK && successor == nullptr)) // both rm and succ are black
+	{
+		if(!rm_node->GetSibling())
+			rm_node->parent->color = DOUBLE_BLACK;
+		else
+			rm_node->color = DOUBLE_BLACK;
+		// fix double black function? 
+	}
 
-	if (rm_node->left == nullptr && rm_node->right == nullptr) // leaf case
-		k < parent->key ? parent->left = nullptr : parent->right = nullptr;
 
-	if (parent->left == rm_node) // single left subtree case
-		rm_node->left != nullptr ? parent->left = rm_node->left : parent->left = rm_node->right;
 
-	if (parent->right == rm_node) // single right subtree case
-		rm_node->left != nullptr ? parent->right = rm_node->left : parent->right = rm_node->right;
+	RbtNode* s = successor->GetSibling();
+
+	while (rm_node->color == DOUBLE_BLACK && rm_node != root)
+	{
+		if (s != nullptr && s->color == BLACK && s->RedChild()) // a. sibling is black with at least one red child
+		{
+			if ((s->IsLeft() && s->left != nullptr && s->left->color == RED)) // LL (sib is left, red child is left) -- RL would also be allowed if both children are red
+			{
+				RbtNode* n = s->right;
+
+				RbtNode* temp = n->parent->right;
+
+				if (n->parent->parent == root)
+					root = n->parent;
+				else
+				{
+					if (n->parent->parent->parent->key < n->parent->key)
+						n->parent->parent->parent->right = n->parent;
+					else
+						n->parent->parent->parent->left = n->parent;
+				}
+
+				n->parent->right = n->parent->parent;
+				n->parent->parent = n->parent->parent->parent;
+
+				n->parent->right->parent = n->parent;
+				n->parent->right->left = temp;
+
+				if (temp)
+					temp->parent = n->parent->right;
+
+				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+				n->parent->parent->color == RED ? n->parent->parent->color = BLACK : n->parent->parent->color = RED;
+
+				n->GetUncle()->color == RED ? n->GetUncle()->color = BLACK : n->GetUncle()->color = RED; // do this part?
+
+
+			}
+			if ((!s->IsLeft() && s->right != nullptr && s->right->color == RED)) // RR (sib is right, red child is right)
+			{
+
+				RbtNode* n = s->left;
+
+				RbtNode* temp = n->parent->left;
+
+				if (n->parent->parent == root)
+					root = n->parent;
+				else
+				{
+					if (n->parent->parent->parent->key < n->parent->key)
+						n->parent->parent->parent->right = n->parent;
+					else
+						n->parent->parent->parent->left = n->parent;
+				}
+
+				n->parent->left = n->parent->parent;
+				n->parent->parent = n->parent->parent->parent; // handles null
+
+				n->parent->left->parent = n->parent;
+				n->parent->left->right = temp;
+
+				if (temp)
+					temp->parent = n->parent->left;
+
+				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED; // do this part? 
+			}
+			if ((s->IsLeft() && s->right != nullptr && s->right->color == RED))  // LR
+			{
+				RbtNode* n = s->right;
+
+				RbtNode* l = n->left;
+
+				n->left = n->parent;
+				n->parent = n->left->parent;
+
+				n->parent->left = n;
+				n->left->parent = n;
+
+				n->left->right = l;
+				n = n->left;
+			}
+			if ((!s->IsLeft() && s->left != nullptr && s->left->color == RED))  // RL
+			{
+				RbtNode* n = s->left;
+
+				RbtNode* r = n->right;
+
+				n->right = n->parent;
+				n->parent = n->right->parent;
+
+				n->parent->right = n;
+				n->right->parent = n;
+
+				n->right->left = r;
+
+				n = n->right;
+			}
+		}
+		else if (s == nullptr || (s->color == BLACK && !s->RedChild())) // b. sibling is black (or doesn't exist), no red child (null is black)
+		{
+			s->color == RED;
+
+			if (s->parent->color == BLACK)
+				rm_node = s->parent;
+		}
+		else if (s->color == RED) // c. sibling is red
+		{
+			if (s->IsLeft()) // L
+			{ 
+				RbtNode* n = s->right; // is this correct in all cases? 
+
+				RbtNode* temp = n->parent->right;
+
+				if (n->parent->parent == root)
+					root = n->parent;
+				else
+				{
+					if (n->parent->parent->parent->key < n->parent->key)
+						n->parent->parent->parent->right = n->parent;
+					else
+						n->parent->parent->parent->left = n->parent;
+				}
+
+				n->parent->right = n->parent->parent;
+				n->parent->parent = n->parent->parent->parent;
+
+				n->parent->right->parent = n->parent;
+				n->parent->right->left = temp;
+
+				if (temp)
+					temp->parent = n->parent->right;
+
+				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED; // do this part? 
+			}
+			else if (!s->IsLeft()) // R
+			{
+				RbtNode* n = s->left; // right? 
+
+				RbtNode* temp = n->parent->left;
+
+				if (n->parent->parent == root)
+					root = n->parent;
+				else
+				{
+					if (n->parent->parent->parent->key < n->parent->key)
+						n->parent->parent->parent->right = n->parent;
+					else
+						n->parent->parent->parent->left = n->parent;
+				}
+
+				n->parent->left = n->parent->parent;
+				n->parent->parent = n->parent->parent->parent; // handles null
+
+				n->parent->left->parent = n->parent;
+				n->parent->left->right = temp;
+
+				if (temp)
+					temp->parent = n->parent->left;
+
+				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
+				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED; // do this part? 
+			}
+		}
+	}
+
+
+
 
 	delete rm_node;
-	return;
+
 }
 
-RbtNode* Rbt::GetParent(int k)
+  
+
+
+RbtNode* RbtNode::FirstRedChild()
+{
+	if (left != nullptr && left->color == RED)
+		return left;
+
+	if (right != nullptr && right->color == RED)
+		return right;
+
+	return nullptr;
+}
+
+bool RbtNode::RedChild()
+{
+	if (left != nullptr && left->color == RED)
+		return true;
+
+	if (right != nullptr && right->color == RED)
+		return true;
+
+	return false;
+}
+
+bool RbtNode::TwoRedChild()
+{
+	if ((left != nullptr && left->color == RED) && (right != nullptr && right->color == RED))
+		return true;
+
+	return false;
+}
+
+
+
+
+
+RbtNode* Rbt::GetParent(int k) // delete this
 {
 	RbtNode* node = root;
 	RbtNode* parent{};
