@@ -5,38 +5,13 @@
 
 #include <vld.h>
 
-enum Color { RED, BLACK, DOUBLE_BLACK };
-
+#include "red-black-tree-node.h"
 
 // support search(tree, key), Predecessor(tree, key), Successor(tree, key),Max(tree), Min(tree) in O(log n) time and explain how
+// put node in a different file and include it here
 
-struct RbtNode 
-{
-    RbtNode(int k) : key(k) {};
-    ~RbtNode() { }; // if this has children/parents fix them? 
-
-    int key{};
-	Color color = RED ;
-
-    RbtNode* left{ nullptr };
-    RbtNode* right{ nullptr };
-	RbtNode* parent{ nullptr };
-
-    RbtNode* GetSibling(); // return ptr to sibling
-    RbtNode* GetUncle(); // returns ptr to uncle of this node
-    RbtNode* GetGrandParent(); // returns ptr to grandparent of this node
-
-    bool RedParent() { return (parent != nullptr && parent->color == RED); }; // true if red
-	bool RedChild(); // true if either child is red, false if both chilred are black or if there are no children 
-    bool RedUncle(); // true when a red uncle exists, otherwise false
-	bool BlackUncle(); // true when a black uncle exists, otherwise false
-
-	RbtNode* FirstRedChild();
-	bool TwoRedChild(); // true when a black uncle exists, otherwise false
-
-    bool ParentIsLeftChild() { return (parent->parent != nullptr && parent->parent->left == parent); }; // true if parent is left child
-    bool IsLeft() { return parent != nullptr && parent->left == this; };
-};
+// anywhere to use references? should keys be references to things? if i dont need to change them i think that would be good
+// const?? 
 
 class Rbt
 {
@@ -44,46 +19,51 @@ public:
 	Rbt() {};
 	~Rbt() { if (root) { DeleteRecur(root); } };
 
-	RbtNode* Insert(int); // insert a node using given key
-	void Delete(int); // deletes node with given key
+	void Insert(int); // inserts a node using given key, returns ptr to new node, nullptr if node already existed
 	RbtNode* Search(int); // returns ptr to node with given key, or nullptr if key doesn't exist
-	int* InOrder(); // returns ordered array of all elements
+	
+	void Delete(int); // deletes node with given key
+	int* InOrder(); // returns ordered array of all keys
 
-    void Rotate(RbtNode* n);
-    void RotateLeft(RbtNode* n);
-    void RotateRight(RbtNode* n);
+	RbtNode* GetPredecessor(int k); // returns predecessor of given key
+	RbtNode* GetSuccesor(int k);// returns successor of given key
+
+	RbtNode* GetMax(); // return largest key value in the tree
+	RbtNode* GetMin(); // returns smallest key value in the tree
 
 	RbtNode* GetRoot() { return root; }; // returns the root node of the tree
 	int GetCount() { return CountRecur(root); }; // returns the number of nodes in the tree
 
-    RbtNode* GetParent(int); // returns parent of given node
-
 private:
-	RbtNode* InsertRecur(RbtNode* n, RbtNode* p, int k); // recursive insert
-	void Rebalance(RbtNode* n);
-    void DeleteRecur(RbtNode* n); // recursive delete
-	void InOrderRecur(RbtNode* n, int arr[], int& i); // recursive inorder
-	int CountRecur(RbtNode* n); // recursive counter
-	RbtNode* NewNode(RbtNode* p, int k); // creates a new node
+	RbtNode* NewNode(RbtNode* p, int k);
+
+	bool IsRed(RbtNode* n); // returns true if node exists and is red, otherwise false
+	void SwapColor(RbtNode* n); // if node exists, swaps colors, otherwise no effect
+	void Rotate(RbtNode* n);
+
+    void DeleteRecur(RbtNode* n);
+	void InOrderRecur(RbtNode* n, int arr[], int& i);
+	int CountRecur(RbtNode* n);
+	
 	RbtNode* root{ nullptr }; // topmost node in tree
 };
 
-RbtNode* Rbt::Insert(int k)
+void Rbt::Insert(int k)
 {
-	if (root == nullptr) // root 
+	if (!root)
 	{
 		root = NewNode(nullptr, k);
 		root->color = BLACK;
-		return root;
+		return;
 	}
 
 	RbtNode* node = root;
 	RbtNode* parent = root;
 
-	while (node != nullptr) 
+	while (node) 
 	{
 		if (k == node->key)
-			return nullptr;
+			return;
 
 		if (k < node->key) 
 		{
@@ -98,152 +78,52 @@ RbtNode* Rbt::Insert(int k)
 	}
 
 	node = NewNode(parent, k);
-    Rebalance(node);
-	return node;
-}
 
-void Rbt::Rebalance(RbtNode* n)
-{
-	n->color = RED;
-
-	while (n != root && n->RedParent())
+	while (node != root && IsRed(node->parent))
 	{
-		if (n->RedUncle())// red uncle.. 
+		if (node->HasRedUncle()) // red uncle
 		{
-			n->parent->color = BLACK;
-			n->parent->parent->color = RED;
-			n->GetUncle()->color = BLACK;
-			n = n->parent->parent;
+			node->parent->color = BLACK;
+			node->parent->parent->color = RED;
+			node->GetUncle()->color = BLACK;
+			node = node->parent->parent;
 		}
-		else
+		else // black/no uncle
 		{
-			if (n->ParentIsLeftChild() && !n->IsLeft()) // LR
+			if (node->ParentIsLeftChild() && !node->IsLeftChild()) // LR
 			{
-				RbtNode* l = n->left;
-
-				n->left = n->parent;
-				n->parent = n->left->parent;
-
-				n->parent->left = n;
-				n->left->parent = n;
-
-				n->left->right = l;
-				n = n->left;
+				Rotate(node);
+				node = node->left;
 			}
-			else if (!n->ParentIsLeftChild() && n->IsLeft()) // RL
+			else if (!node->ParentIsLeftChild() && node->IsLeftChild()) // RL
 			{
-				RbtNode* r = n->right;
-
-				n->right = n->parent;
-				n->parent = n->right->parent;
-
-				n->parent->right = n;
-				n->right->parent = n;
-
-				n->right->left = r;
-
-				n = n->right;
+				Rotate(node);
+				node = node->right;
 			}
-			else if (n->ParentIsLeftChild() && n->IsLeft()) // LL
+			else if (node->ParentIsLeftChild() && node->IsLeftChild()) // LL
 			{
-				assert(n->parent != root); 
-				RbtNode* temp = n->parent->right;
-
-				if (n->parent->parent == root)
-					root = n->parent;
-				else
-				{
-					if (n->parent->parent->parent->key < n->parent->key)
-						n->parent->parent->parent->right = n->parent;
-					else
-						n->parent->parent->parent->left = n->parent;
-				}
-
-				n->parent->right = n->parent->parent;
-				n->parent->parent = n->parent->parent->parent;
-
-				n->parent->right->parent = n->parent;
-				n->parent->right->left = temp;
-
-				if (temp)
-					temp->parent = n->parent->right;
-
-				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
-				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
+				Rotate(node);
+				SwapColor(node->parent);
+				SwapColor(node->GetSibling());
 			}
-			else if (!n->ParentIsLeftChild() && !n->IsLeft()) // RR
+			else if (!node->ParentIsLeftChild() && !node->IsLeftChild()) // RR
 			{
-				assert(n->parent != root);
-				RbtNode* temp = n->parent->left;
-
-				if (n->parent->parent == root)
-					root = n->parent;
-				else
-				{
-					if (n->parent->parent->parent->key < n->parent->key)
-						n->parent->parent->parent->right = n->parent;
-					else
-						n->parent->parent->parent->left = n->parent;
-				}
-
-				n->parent->left = n->parent->parent;
-				n->parent->parent = n->parent->parent->parent; // handles null
-
-				n->parent->left->parent = n->parent;
-				n->parent->left->right = temp;
-
-				if (temp)
-					temp->parent = n->parent->left;
-
-				n->parent->color == RED ? n->parent->color = BLACK : n->parent->color = RED;
-				n->GetSibling()->color == RED ? n->GetSibling()->color = BLACK : n->GetSibling()->color = RED;
+				Rotate(node);
+				SwapColor(node->parent);
+				SwapColor(node->GetSibling());
 			}
 		}
 	}
 
-	if (n == root)
-		n->color = BLACK;
-}
-
-RbtNode* Rbt::NewNode(RbtNode* p, int k)
-{
-	RbtNode* node = new RbtNode(k);
-
-	if (root)
-	{
-		node->parent = p;
-
-		if (k < p->key)
-			p->left = node; 
-		else
-			p->right = node;
-	}
-		
-	return node;
-}
-
-RbtNode* Rbt::InsertRecur(RbtNode* n, RbtNode* p, int k)
-{
-	if (n == nullptr)
-		return NewNode(p, k);
-
-	if (k == n->key)
-		return nullptr;
-
-	if (k < n->key)
-		n->left = InsertRecur(n->left, n, k);
-
-	if (k > n->key)
-		n->right = InsertRecur(n->right, n, k);
-		
-	return n;
+	if (node == root)
+		node->color = BLACK;
 }
 
 RbtNode* Rbt::Search(int k)
 {
 	RbtNode* node = root;
 
-	while (node != nullptr)
+	while (node)
 	{
 		if (k == node->key)
 			return node;
@@ -257,135 +137,192 @@ RbtNode* Rbt::Search(int k)
 	return nullptr;
 }
 
+RbtNode* Rbt::GetSuccesor(int k)
+{
+	RbtNode* node = root;
 
+	while (node)
+	{
+		if (k == node->key)
+		{
+			return node->right; // orrrrr... ? 
+		}
+			
 
+		if (k < node->key)
+			node = node->left;
+		else
+			node = node->right;
+	}
 
+	return nullptr;
+}
+
+RbtNode* Rbt::GetPredecessor(int k)
+{
+	return nullptr;
+}
+
+RbtNode* Rbt::GetMin()
+{
+	return nullptr;
+}
+
+RbtNode* Rbt::GetMax()
+{
+	return nullptr;
+}
 
 void Rbt::Delete(int k)
 {
-	RbtNode* remove = Search(k);
+	RbtNode* rm = Search(k);
 
-    if (!remove)
-        return;
+	if (!rm)
+		return;
 
-	RbtNode* successor = nullptr;
+	RbtNode* succ = nullptr;
 
-	if (remove->left == nullptr && remove->right == nullptr) // leaf case, no children (leaves are always black)
+	if (!rm->left && !rm->right) // leaf case
 	{
-        if (remove == root)
-        {
-            root = nullptr;
-            return;
-        }
-        else
-        {
-            if (remove->IsLeft())
-                remove->parent->left = nullptr; // hook up parent to successor
-            else
-                remove->parent->right = nullptr;
-        }
+		if (rm == root)
+		{
+			root = nullptr;
+			delete rm;
+			return;
+		}
 
-        successor = remove;
-	}
-	else if (remove->left != nullptr && remove->right != nullptr) // both children
-	{
-		successor = remove->left;
-		while (successor->right != nullptr)
-			successor = successor->right;
-
-		remove->key = successor->key;
-
-		if (successor->IsLeft())
-			successor->parent->left = nullptr;
+		if (rm->IsLeftChild())
+			rm->parent->left = nullptr;
 		else
-			successor->parent->right = nullptr;
+			rm->parent->right = nullptr;
 
+		succ = rm;
 	}
-	else if (remove->left != nullptr || remove->right != nullptr)  // one child
+	else if (rm->left && rm->right) // both children
 	{
-        if (remove->left)
-            successor = remove->left;
-        else
-            successor = remove->right;
+		succ = rm->left;
+		while (succ->right != nullptr)
+			succ = succ->right;
 
-        if (remove->IsLeft())
-            remove->parent->left = successor;
-        else
-            remove->parent->right = successor;
+		rm->key = succ->key;
 
-        successor->parent = remove->parent;
+		if (succ->IsLeftChild())
+			succ->parent->left = nullptr;
+		else
+			succ->parent->right = nullptr;
+
+		succ->key = k;
+		rm = succ;
+	}
+	else if (rm->left || rm->right)  // one child
+	{
+		if (rm->left)
+			succ = rm->left;
+		else
+			succ = rm->right;
+
+		if (rm->IsLeftChild())
+			rm->parent->left = succ;
+		else
+			rm->parent->right = succ;
+
+		succ->parent = rm->parent;
 	}
 
-	if (remove->color == RED || (successor->color == RED))  // one or both of rm/succ is red
+	if (IsRed(rm) || IsRed(succ))  // one or both of rm/succ is red
 	{
-		if(successor != nullptr)
-            successor->color = BLACK;
+
+		if (succ)
+			succ->color = BLACK;
 	}
-	else if (remove->color == BLACK && successor->color == BLACK) // both rm and succ are black
+	else if (!IsRed(rm) && !IsRed(succ)) // both rm and succ are black
 	{
-        successor->color = DOUBLE_BLACK;
+		succ->color = D_BLACK;
 	}
 
-    RbtNode* sibling = nullptr;
+	RbtNode* sib = nullptr;
 
-	while (successor != root && successor->color == DOUBLE_BLACK) 
+	while (succ != root && succ->color == D_BLACK)
 	{
-        sibling = successor->GetSibling();
+		sib = succ->GetSibling();
 
-		if (sibling != nullptr && sibling->color == BLACK && sibling->RedChild()) // a. sibling is black, at least one red child
+		if (sib && sib->color == BLACK && sib->HasRedChild()) // a. sibling is black, at least one red child
 		{
-			if ((sibling->IsLeft() && sibling->left != nullptr && sibling->left->color == RED)) // LL (sib, red child) 
+			if (sib->IsLeftChild() && IsRed(sib->left)) // LL 
 			{
-                Rotate(sibling->left);
-                sibling->left->color == RED ? sibling->left->color = BLACK : sibling->left->color = RED;
-                successor->color = BLACK;
+				Rotate(sib->left);
+				SwapColor(sib->left);
+				succ->color = BLACK;
 			}
-			if ((!sibling->IsLeft() && sibling->right != nullptr && sibling->right->color == RED)) // RR (sib, red child) 
+			else if (!sib->IsLeftChild() && IsRed(sib->right)) // RR
 			{
-                Rotate(sibling->right);
-                sibling->right->color == RED ? sibling->right->color = BLACK : sibling->right->color = RED;
-                successor->color = BLACK;
+				Rotate(sib->right);
+				SwapColor(sib->right);
+				succ->color = BLACK;
 			}
-			if ((sibling->IsLeft() && sibling->right != nullptr && sibling->right->color == RED))  // LR (sib, red child) 
+			else if (sib->IsLeftChild() && IsRed(sib->right))  // LR
 			{
-                Rotate(sibling->right);
+				Rotate(sib->right);
+				SwapColor(sib);
+				SwapColor(sib->parent);
 			}
-			if ((!sibling->IsLeft() && sibling->left != nullptr && sibling->left->color == RED))  // RL (sib, red child) 
+			else if (!sib->IsLeftChild() && IsRed(sib->left))  // RL
 			{
-                Rotate(sibling->left);
+				Rotate(sib->left);
+				SwapColor(sib);
+				SwapColor(sib->parent);
 			}
 		}
-		else if (sibling == nullptr || (sibling->color == BLACK && !sibling->RedChild())) // b. sibling is black, no red child
+		else if (sib == nullptr || (sib->color == BLACK && !sib->HasRedChild())) // b. sibling is black, no red child
 		{
-			sibling->color = RED;
-            successor->color = BLACK;
+			sib->color = RED;
+			succ->color = BLACK;
 		}
-		else if (sibling->color == RED) // c. sibling is red
+		else if (IsRed(sib)) // c. sibling is red
 		{
-			if (sibling->IsLeft()) // L
-			{ 
-                Rotate(sibling->right);
-                successor->color = BLACK;
-
-                sibling->color == RED ? sibling->color = BLACK : sibling->color = RED;
-                sibling->right->GetSibling()->color == RED ? sibling->right->GetSibling()->color = BLACK : sibling->right->GetSibling()->color = RED;
-			}
-			else if (!sibling->IsLeft()) // R
+			if (sib->IsLeftChild()) // L
 			{
-                Rotate(sibling->left);
-                successor->color = BLACK;
+				Rotate(sib->right);
+				succ->color = BLACK;
 
-                sibling->color == RED ? sibling->color = BLACK : sibling->color = RED;
-                sibling->left->GetSibling()->color == RED ? sibling->left->GetSibling()->color = BLACK : sibling->left->GetSibling()->color = RED;
+				SwapColor(sib);
+				SwapColor(sib->right->GetSibling());
+			}
+			else if (!sib->IsLeftChild()) // R
+			{
+				Rotate(sib->left);
+				succ->color = BLACK;
+
+				SwapColor(sib);
+				SwapColor(sib->left->GetSibling());
 			}
 		}
 	}
+
+	assert(rm->key == k);
+	delete rm;
 }
 
-  
+RbtNode* Rbt::NewNode(RbtNode* p, int k)
+{
+	RbtNode* node = new RbtNode(k);
+
+	if (root)
+	{
+		node->parent = p;
+
+		if (k < p->key)
+			p->left = node;
+		else
+			p->right = node;
+	}
+
+	return node;
+}
+
 void Rbt::Rotate(RbtNode* n)
 {
-    if (n->ParentIsLeftChild() && !n->IsLeft()) // LR
+    if (n->ParentIsLeftChild() && !n->IsLeftChild()) // LR
     {
         RbtNode* l = n->left;
 
@@ -396,13 +333,8 @@ void Rbt::Rotate(RbtNode* n)
         n->left->parent = n;
 
         n->left->right = l;
-        
-        //n = n->left;
-
-        n->color == RED ? n->color = BLACK : n->color = RED;
-        n->left->color == RED ? n->left->color = BLACK : n->left->color = RED;
     }
-    else if (!n->ParentIsLeftChild() && n->IsLeft()) // RL
+    else if (!n->ParentIsLeftChild() && n->IsLeftChild()) // RL
     {
         RbtNode* r = n->right;
 
@@ -413,11 +345,8 @@ void Rbt::Rotate(RbtNode* n)
         n->right->parent = n;
 
         n->right->left = r;
-
-        n->color == RED ? n->color = BLACK : n->color = RED;
-        n->right->color == RED ? n->right->color = BLACK : n->right->color = RED;
     }
-    else if (n->ParentIsLeftChild() && n->IsLeft()) // LL
+    else if (n->ParentIsLeftChild() && n->IsLeftChild()) // LL
     {
         RbtNode* temp = n->parent->right;
 
@@ -439,11 +368,9 @@ void Rbt::Rotate(RbtNode* n)
 
         if (temp)
             temp->parent = n->parent->right;
-
     }
-    else if (!n->ParentIsLeftChild() && !n->IsLeft()) // RR
+    else if (!n->ParentIsLeftChild() && !n->IsLeftChild()) // RR
     {
-        assert(n->parent != root);
         RbtNode* temp = n->parent->left;
 
         if (n->parent->parent == root)
@@ -470,71 +397,9 @@ void Rbt::Rotate(RbtNode* n)
         n->color = BLACK;
 }
     
-
-
-RbtNode* RbtNode::FirstRedChild()
-{
-	if (left != nullptr && left->color == RED)
-		return left;
-
-	if (right != nullptr && right->color == RED)
-		return right;
-
-	return nullptr;
-}
-
-bool RbtNode::RedChild()
-{
-	if (left != nullptr && left->color == RED)
-		return true;
-
-	if (right != nullptr && right->color == RED)
-		return true;
-
-	return false;
-}
-
-bool RbtNode::TwoRedChild()
-{
-	if ((left != nullptr && left->color == RED) && (right != nullptr && right->color == RED))
-		return true;
-
-	return false;
-}
-
-
-
-
-
-RbtNode* Rbt::GetParent(int k) // delete this
-{
-	RbtNode* node = root;
-	RbtNode* parent{};
-
-	while (node != nullptr)
-	{
-		if (k == node->key)
-			return parent;
-
-		if (k < node->key)
-		{
-			parent = node;
-			node = node->left;
-		}
-
-		if (k > node->key)
-		{
-			parent = node;
-			node = node->right;
-		}
-	}
-
-	return nullptr;
-}
-
 int* Rbt::InOrder()
 {
-	if (root == nullptr)
+	if (!root)
 		return nullptr;
 
 	int len = CountRecur(root);
@@ -573,7 +438,7 @@ void Rbt::InOrderRecur(RbtNode* n, int arr[], int& i)
 
 int Rbt::CountRecur(RbtNode* n)
 {
-	if (n == nullptr)
+	if (!n)
 		return 0;
 
 	int total = 1;
@@ -584,83 +449,27 @@ int Rbt::CountRecur(RbtNode* n)
 
 void Rbt::DeleteRecur(RbtNode* n)
 {
-
-	if (n->left != nullptr)
+	if (n->left)
 		DeleteRecur(n->left);
 
-	if (n->right != nullptr)
+	if (n->right)
 		DeleteRecur(n->right);
 
 	delete n;
 }
 
-RbtNode* RbtNode::GetSibling()
+bool Rbt::IsRed(RbtNode* n)
 {
-    if (this == nullptr)
-        return nullptr; 
+	if (!n)
+		return false;
 
-    if (this == parent->left)
-        return parent->right;
-    else if (this == parent->right)
-        return parent->left;
-    else                     // pred was nullptr, so we need to send non-null child of parent back
-    {
-        if (parent->left != nullptr)
-            return parent->left;
-        else
-            return parent->right;
-    }
+	return n->color == RED;	
 }
 
-RbtNode* RbtNode::GetUncle()
+void Rbt::SwapColor(RbtNode* n)
 {
-    if (parent && parent->parent)
-    {
-        if (parent->parent->left == parent && parent->parent->right != nullptr)
-            return parent->parent->right;
+	if (!n)
+		return;
 
-        if (parent->parent->right == parent && parent->parent->left != nullptr)
-            return parent->parent->left;
-    }
-
-    return nullptr;
-}
-
-bool RbtNode::RedUncle()
-{
-	if (parent && parent->parent)
-	{
-		if (parent->parent->left == parent && parent->parent->right != nullptr)
-			return parent->parent->right->color == RED;
-
-		if (parent->parent->right == parent && parent->parent->left != nullptr)
-			return parent->parent->left->color == RED;
-	}
-
-	return false; // no parent or gparent
-}
-
-bool RbtNode::BlackUncle()
-{
-	if (parent && parent->parent)
-	{
-		if (parent->parent->left == parent && parent->parent->right != nullptr)
-			return parent->parent->right->color == BLACK;
-
-		if (parent->parent->right == parent && parent->parent->left != nullptr)
-			return parent->parent->left->color == BLACK;
-	}
-
-	return false; // no parent or gparent
-}
-
-
-
-
-RbtNode* RbtNode::GetGrandParent()
-{
-    if (parent && parent->parent)
-        return parent->parent;
-
-    return nullptr;
+	n->color == RED ? n->color = BLACK : n->color = RED;
 }

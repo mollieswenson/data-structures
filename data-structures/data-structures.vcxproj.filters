@@ -63,6 +63,9 @@
     <ClInclude Include="test-red-black-tree.h">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="red-black-tree-node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

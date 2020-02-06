@@ -22,16 +22,19 @@ int test_rbt()
     a.Insert(32);
     a.Insert(19); // RL, RR
     a.Insert(6);  // recolor
-    a.Insert(7);  // LR, LL
+    
+	a.Insert(7);  // LR, LL
     a.Insert(42);
     a.Insert(66); // RR
     a.Insert(39); // recolor
-    a.Insert(29);
+    
+	a.Insert(29);
     a.Insert(12); // recolor
     a.Insert(25); // recolor, recolor
     a.Insert(22); // LL
 
-    // check inserts so far...
+	//std::cout << "\n\n ==================== "; // is this right? 
+	//Print(a, a.GetRoot());
 
     node = a.GetRoot();
     assert(node->key == 19); // expected root node
@@ -121,12 +124,17 @@ int test_rbt()
     a.Insert(31);
     a.Insert(24);
     a.Insert(37);
+
     a.Insert(38);
     a.Insert(77);
     a.Insert(88);
     a.Insert(90);
+
     a.Insert(89);
     a.Insert(91);
+
+	//std::cout << "\n\n ==================== "; // is this right? 
+	//Print(a, a.GetRoot());
 
     node = a.GetRoot()->right;
     assert(node->key == 32);
@@ -163,20 +171,105 @@ int test_rbt()
     assert(node->right == nullptr);
     assert(node->color == RED);
 
-    std::cout << "\n\n ==================== "; // is this right? 
-    Print(a, a.GetRoot());
+	a.Insert(35); // insert a bunch more
+	a.Insert(14);
+	a.Insert(13);
+	a.Insert(34);
 
-    a.Insert(30); // insert some more numbers
-    a.Insert(31);
-    a.Insert(24);
-    a.Insert(37);
-    a.Insert(38);
-    a.Insert(77);
-    a.Insert(88);
-    a.Insert(90);
-    a.Insert(89);
-    a.Insert(91);
-    
+	a.Insert(40);
+	a.Insert(1);
+	a.Insert(21);
+	a.Insert(23);
+
+	a.Insert(11);
+	a.Insert(27);
+	a.Insert(28);
+	a.Insert(33);
+
+	a.Insert(10);
+	a.Insert(8);
+	a.Insert(5);
+	a.Insert(36);
+
+	a.Insert(16);
+	a.Insert(15);
+	a.Insert(4);
+	a.Insert(3);
+
+	a.Insert(41);
+	a.Insert(43);
+	a.Insert(17);
+	a.Insert(18);
+
+	node = a.GetRoot()->left;
+	assert(node->key == 19);
+	assert(node->parent == a.Search(32));
+	assert(node->left == a.Search(10));
+	assert(node->right == a.Search(25));
+	assert(node->color == BLACK);
+
+	node = a.GetRoot()->left->left->left->left->left;
+	assert(node->key == 3);
+	assert(node->parent == a.Search(5));
+	assert(node->left == a.Search(1));
+	assert(node->right == a.Search(4));
+	assert(node->color == BLACK);
+
+	node = a.GetRoot()->left->left->right->right;
+	assert(node->key == 16);
+	assert(node->parent == a.Search(14));
+	assert(node->left == a.Search(15));
+	assert(node->right == a.Search(17));
+	assert(node->color == RED);
+
+	node = a.GetRoot()->left->right->right;
+	assert(node->key == 30);
+	assert(node->parent == a.Search(25));
+	assert(node->left == a.Search(28));
+	assert(node->right == a.Search(31));
+	assert(node->color == RED);
+
+	node = a.GetRoot()->right->left->left;
+	assert(node->key == 35);
+	assert(node->parent == a.Search(38));
+	assert(node->left == a.Search(34));
+	assert(node->right == a.Search(37));
+	assert(node->color == RED);
+
+	node = a.GetRoot()->right->left->right;
+	assert(node->key == 42);
+	assert(node->parent == a.Search(38));
+	assert(node->left == a.Search(40));
+	assert(node->right == a.Search(66));
+	assert(node->color == RED);
+
+	node = a.GetRoot()->right->right;
+	assert(node->key == 89);
+	assert(node->parent == a.Search(77));
+	assert(node->left == a.Search(88));
+	assert(node->right == a.Search(90));
+	assert(node->color == BLACK);
+
+	a.Insert(2);
+	a.Insert(0);
+	a.Insert(20);
+	a.Insert(26);
+
+	a.Delete(66);
+	a.Delete(77);
+	a.Delete(88);
+	a.Delete(89);
+	a.Delete(90);
+	a.Delete(91);
+
+	//PrintKeys(a);
+
+	int* keys = a.InOrder();
+	for (int i = 0; i < a.GetCount(); i++)
+		assert(a.Search(i)->key == keys[i]); // keys in expected order
+	delete keys;
+
+
     Rbt b;
 
     b.Insert(40);
@@ -396,13 +489,6 @@ int test_rbt()
     assert(node->color == RED);
 
 
-
-    // TODO: DELETE SOME STUFF OUT OUT a TREE
-
-
-
-
-
     Rbt c;
 
     for (int i = 1; i < 21; i++) // keys 1-20 in order
@@ -464,9 +550,6 @@ int test_rbt()
     assert(node->right == nullptr);
     assert(node->color == BLACK);
 
-     //Print(c, c.GetRoot());
-
-  
 
 	return 0;
 }
