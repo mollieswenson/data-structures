@@ -7,11 +7,6 @@
 
 #include "red-black-tree-node.h"
 
-// support search(tree, key), Predecessor(tree, key), Successor(tree, key),Max(tree), Min(tree) in O(log n) time and explain how
-// put node in a different file and include it here
-
-// anywhere to use references? should keys be references to things? if i dont need to change them i think that would be good
-// const?? 
 
 class Rbt
 {
@@ -25,8 +20,8 @@ public:
 	void Delete(int); // deletes node with given key
 	int* InOrder(); // returns ordered array of all keys
 
-	RbtNode* GetPredecessor(int k); // returns predecessor of given key
-	RbtNode* GetSuccesor(int k);// returns successor of given key
+	RbtNode* GetPredecessor(int); // returns predecessor of given key
+	RbtNode* GetSuccesor(int);// returns successor of given key
 
 	RbtNode* GetMax(); // return largest key value in the tree
 	RbtNode* GetMin(); // returns smallest key value in the tree
@@ -35,15 +30,15 @@ public:
 	int GetCount() { return CountRecur(root); }; // returns the number of nodes in the tree
 
 private:
-	RbtNode* NewNode(RbtNode* p, int k);
+	RbtNode* NewNode(RbtNode* n, int k);
 
-	bool IsRed(RbtNode* n); // returns true if node exists and is red, otherwise false
-	void SwapColor(RbtNode* n); // if node exists, swaps colors, otherwise no effect
-	void Rotate(RbtNode* n);
+	bool IsRed(RbtNode*); // returns true if node exists and is red, otherwise false
+	void SwapColor(RbtNode*); // if node exists, swaps colors, otherwise no effect
+	void Rotate(RbtNode*);
 
-    void DeleteRecur(RbtNode* n);
+    void DeleteRecur(RbtNode*);
 	void InOrderRecur(RbtNode* n, int arr[], int& i);
-	int CountRecur(RbtNode* n);
+	int CountRecur(RbtNode*);
 	
 	RbtNode* root{ nullptr }; // topmost node in tree
 };
@@ -139,20 +134,23 @@ RbtNode* Rbt::Search(int k)
 
 RbtNode* Rbt::GetSuccesor(int k)
 {
-	RbtNode* node = root;
+	RbtNode* node = Search(k);
 
-	while (node)
+	if (!node)
+		return nullptr;
+
+	if (node->right)
 	{
-		if (k == node->key)
-		{
-			return node->right; // orrrrr... ? 
-		}
-			
-
-		if (k < node->key)
+		node = node->right;
+		while (node->left)
 			node = node->left;
-		else
-			node = node->right;
+		return node;
+	}
+	else 
+	{
+		while (node->parent && !node->IsLeftChild())
+			node = node->parent;
+		return node->parent;
 	}
 
 	return nullptr;
@@ -160,17 +158,46 @@ RbtNode* Rbt::GetSuccesor(int k)
 
 RbtNode* Rbt::GetPredecessor(int k)
 {
+	RbtNode* node = Search(k);
+
+	if (!node)
+		return nullptr;
+
+	if (node->left)
+	{
+		node = node->left;
+		while (node->right)
+			node = node->right;
+		return node;
+	}
+	else
+	{
+		while (node->parent && node->IsLeftChild())
+			node = node->parent;
+		return node->parent;
+	}
+
 	return nullptr;
 }
 
 RbtNode* Rbt::GetMin()
 {
-	return nullptr;
+	RbtNode* node = root;
+
+	while (node->left)
+		node = node->left;
+
+	return node;
 }
 
 RbtNode* Rbt::GetMax()
 {
-	return nullptr;
+	RbtNode* node = root;
+
+	while (node->right)
+		node = node->right;
+
+	return node;
 }
 
 void Rbt::Delete(int k)

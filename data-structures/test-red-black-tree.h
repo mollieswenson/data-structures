@@ -33,9 +33,6 @@ int test_rbt()
     a.Insert(25); // recolor, recolor
     a.Insert(22); // LL
 
-	//std::cout << "\n\n ==================== "; // is this right? 
-	//Print(a, a.GetRoot());
-
     node = a.GetRoot();
     assert(node->key == 19); // expected root node
     assert(node->parent == nullptr); // expected parent
@@ -119,6 +116,26 @@ int test_rbt()
     assert(node->left == nullptr);
     assert(node->right == nullptr);
     assert(node->color == BLACK);
+
+	assert(a.GetSuccesor(9)->key == 12); // get successor tests
+	assert(a.GetSuccesor(25)->key ==29);
+	assert(a.GetSuccesor(29)->key == 32);
+	assert(a.GetSuccesor(6)->key == 7);
+	assert(a.GetSuccesor(19)->key == 22);
+	assert(a.GetSuccesor(66) == nullptr);
+
+	assert(a.GetPredecessor(12)->key == 9);  // get predecessor tests
+	assert(a.GetPredecessor(29)->key == 25);
+	assert(a.GetPredecessor(39)->key == 32);
+	assert(a.GetPredecessor(7)->key == 6);
+	assert(a.GetPredecessor(22)->key == 19);
+	assert(a.GetPredecessor(6) == nullptr);
+
+	assert(a.GetMax()->key == 66); // min/max tests
+	assert(a.GetMin()->key == 6);
+
+	//std::cout << "\n\n ==================== "; 
+	//Print(a, a.GetRoot());
 
     a.Insert(30); // insert some more numbers
     a.Insert(31);
