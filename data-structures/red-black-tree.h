@@ -16,14 +16,14 @@ public:
 	RedBlackTree() {};
 	~RedBlackTree() { if (root) { DeleteRecur(root); } };
 
-	void Insert(Key); // inserts a node using given key, returns ptr to new node, nullptr if node already existed
-	Node* Search(Key); // returns ptr to node with given key, or nullptr if key doesn't exist
+	void Insert(const Key&); // inserts a node using given key, returns ptr to new node, nullptr if node already existed
+	Node* Search(const Key&) const; // returns ptr to node with given key, or nullptr if key doesn't exist
 	
-	void Delete(Key); // deletes node with given key
-	int* InOrder(); // returns ordered array of all keys
+	void Delete(const Key&); // deletes node with given key
+	Key* InOrder(); // returns ordered array of all keys
 
-	Node* GetPredecessor(Key); // returns predecessor of given key
-	Node* GetSuccesor(Key);// returns successor of given key
+	Node* GetPredecessor(const Key&); // returns predecessor of given key
+	Node* GetSuccesor(const Key&);// returns successor of given key
 
 	Node* GetMax(); // return largest key value in the tree
 	Node* GetMin(); // returns smallest key value in the tree
@@ -32,7 +32,7 @@ public:
 	int GetCount() { return CountRecur(root); }; // returns the number of nodes in the tree
 
 private:
-	Node* NewNode(Node* n, Key k);
+	Node* NewNode(Node* n, const Key& k);
 
 	bool IsRed(Node*); // returns true if node exists and is red, otherwise false
 	void SwapColor(Node*); // if node exists, swaps colors, otherwise no effect
@@ -46,7 +46,7 @@ private:
 };
 
 template <typename Key>
-void RedBlackTree<Key>::Insert(Key k)
+void RedBlackTree<Key>::Insert(const Key& k)
 {
 	if (!root)
 	{
@@ -118,7 +118,7 @@ void RedBlackTree<Key>::Insert(Key k)
 }
 
 template <typename Key>
-RbtNode<Key>* RedBlackTree<Key>::Search(Key k)
+RbtNode<Key>* RedBlackTree<Key>::Search(const Key& k) const
 {
 	Node* node = root;
 
@@ -137,7 +137,7 @@ RbtNode<Key>* RedBlackTree<Key>::Search(Key k)
 }
 
 template <typename Key>
-RbtNode<Key>* RedBlackTree<Key>::GetSuccesor(Key k)
+RbtNode<Key>* RedBlackTree<Key>::GetSuccesor(const Key& k)
 {
 	Node* node = Search(k);
 
@@ -162,7 +162,7 @@ RbtNode<Key>* RedBlackTree<Key>::GetSuccesor(Key k)
 }
 
 template <typename Key>
-RbtNode<Key>* RedBlackTree<Key>::GetPredecessor(Key k)
+RbtNode<Key>* RedBlackTree<Key>::GetPredecessor(const Key& k)
 {
 	Node* node = Search(k);
 
@@ -209,7 +209,7 @@ RbtNode<Key>* RedBlackTree<Key>::GetMax()
 }
 
 template <typename Key>
-void RedBlackTree<Key>::Delete(Key k) // this is a huge function..
+void RedBlackTree<Key>::Delete(const Key& k) // this is a huge function..
 {
 	Node* rm = Search(k);
 
@@ -340,7 +340,7 @@ void RedBlackTree<Key>::Delete(Key k) // this is a huge function..
 }
 
 template <typename Key>
-RbtNode<Key>* RedBlackTree<Key>::NewNode(Node* p, Key k)
+RbtNode<Key>* RedBlackTree<Key>::NewNode(Node* p, const Key& k)
 {
 	Node* node = new Node(k);
 
@@ -436,13 +436,13 @@ void RedBlackTree<Key>::Rotate(Node* n)
 }
 
 template <typename Key>
-int* RedBlackTree<Key>::InOrder()
+Key* RedBlackTree<Key>::InOrder()  // This can be a lot better 
 {
 	if (!root)
 		return nullptr;
 
 	int len = CountRecur(root);
-	int* arr = new int[len];
+	Key* arr = new Key[len];
 	int i = 0;
 
 	InOrderRecur(root, arr, i); // fill up arr
@@ -453,7 +453,7 @@ int* RedBlackTree<Key>::InOrder()
 		{
 			if (arr[j] > arr[j + 1])
 			{
-				int temp = arr[j];
+				Key temp = arr[j];
 				arr[j] = arr[j + 1];
 				arr[j + 1] = temp;
 			}
@@ -464,7 +464,7 @@ int* RedBlackTree<Key>::InOrder()
 }
 
 template <typename Key>
-void RedBlackTree<Key>::InOrderRecur(Node* n, Key arr[], int& i)
+void RedBlackTree<Key>::InOrderRecur(Node* n, Key arr[], int& i) // So can this
 {
 	arr[i] = n->key;
 	i++;
