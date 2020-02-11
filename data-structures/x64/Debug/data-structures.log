@@ -1,5 +1,2 @@
 ﻿  data-structures.cpp
-c:\users\morrie\desktop\repos\data-structures\data-structures\red-black-tree.h(160): error C2511: 'RbtNode *Rbt::GetPredecessor(int)': overloaded member function not found in 'Rbt'
-  c:\users\morrie\desktop\repos\data-structures\data-structures\red-black-tree.h(11): note: see declaration of 'Rbt'
-c:\users\morrie\desktop\repos\data-structures\data-structures\red-black-tree.h(161): error C2352: 'Rbt::Search': illegal call of non-static member function
-  c:\users\morrie\desktop\repos\data-structures\data-structures\red-black-tree.h(117): note: see declaration of 'Rbt::Search'
+  data-structures.vcxproj -> C:\Users\Morrie\Desktop\Repos\data-structures\x64\Debug\data-structures.exe

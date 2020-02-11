@@ -7,43 +7,46 @@
 
 #include "red-black-tree-node.h"
 
-
-class Rbt
+template <typename Key>
+class RedBlackTree
 {
-public:
-	Rbt() {};
-	~Rbt() { if (root) { DeleteRecur(root); } };
+	using Node = RbtNode<Key>;
 
-	void Insert(int); // inserts a node using given key, returns ptr to new node, nullptr if node already existed
-	RbtNode* Search(int); // returns ptr to node with given key, or nullptr if key doesn't exist
+public:
+	RedBlackTree() {};
+	~RedBlackTree() { if (root) { DeleteRecur(root); } };
+
+	void Insert(Key); // inserts a node using given key, returns ptr to new node, nullptr if node already existed
+	Node* Search(Key); // returns ptr to node with given key, or nullptr if key doesn't exist
 	
-	void Delete(int); // deletes node with given key
+	void Delete(Key); // deletes node with given key
 	int* InOrder(); // returns ordered array of all keys
 
-	RbtNode* GetPredecessor(int); // returns predecessor of given key
-	RbtNode* GetSuccesor(int);// returns successor of given key
+	Node* GetPredecessor(Key); // returns predecessor of given key
+	Node* GetSuccesor(Key);// returns successor of given key
 
-	RbtNode* GetMax(); // return largest key value in the tree
-	RbtNode* GetMin(); // returns smallest key value in the tree
+	Node* GetMax(); // return largest key value in the tree
+	Node* GetMin(); // returns smallest key value in the tree
 
-	RbtNode* GetRoot() { return root; }; // returns the root node of the tree
+	Node* GetRoot() { return root; }; // returns the root node of the tree
 	int GetCount() { return CountRecur(root); }; // returns the number of nodes in the tree
 
 private:
-	RbtNode* NewNode(RbtNode* n, int k);
+	Node* NewNode(Node* n, Key k);
 
-	bool IsRed(RbtNode*); // returns true if node exists and is red, otherwise false
-	void SwapColor(RbtNode*); // if node exists, swaps colors, otherwise no effect
-	void Rotate(RbtNode*);
+	bool IsRed(Node*); // returns true if node exists and is red, otherwise false
+	void SwapColor(Node*); // if node exists, swaps colors, otherwise no effect
+	void Rotate(Node*);
 
-    void DeleteRecur(RbtNode*);
-	void InOrderRecur(RbtNode* n, int arr[], int& i);
-	int CountRecur(RbtNode*);
+    void DeleteRecur(Node*);
+	void InOrderRecur(Node* n, Key arr[], int& i);
+	int CountRecur(Node*);
 	
-	RbtNode* root{ nullptr }; // topmost node in tree
+	Node* root{ nullptr }; // topmost node in tree
 };
 
-void Rbt::Insert(int k)
+template <typename Key>
+void RedBlackTree<Key>::Insert(Key k)
 {
 	if (!root)
 	{
@@ -52,8 +55,8 @@ void Rbt::Insert(int k)
 		return;
 	}
 
-	RbtNode* node = root;
-	RbtNode* parent = root;
+	Node* node = root;
+	Node* parent = root;
 
 	while (node) 
 	{
@@ -114,9 +117,10 @@ void Rbt::Insert(int k)
 		node->color = BLACK;
 }
 
-RbtNode* Rbt::Search(int k)
+template <typename Key>
+RbtNode<Key>* RedBlackTree<Key>::Search(Key k)
 {
-	RbtNode* node = root;
+	Node* node = root;
 
 	while (node)
 	{
@@ -132,9 +136,10 @@ RbtNode* Rbt::Search(int k)
 	return nullptr;
 }
 
-RbtNode* Rbt::GetSuccesor(int k)
+template <typename Key>
+RbtNode<Key>* RedBlackTree<Key>::GetSuccesor(Key k)
 {
-	RbtNode* node = Search(k);
+	Node* node = Search(k);
 
 	if (!node)
 		return nullptr;
@@ -156,9 +161,10 @@ RbtNode* Rbt::GetSuccesor(int k)
 	return nullptr;
 }
 
-RbtNode* Rbt::GetPredecessor(int k)
+template <typename Key>
+RbtNode<Key>* RedBlackTree<Key>::GetPredecessor(Key k)
 {
-	RbtNode* node = Search(k);
+	Node* node = Search(k);
 
 	if (!node)
 		return nullptr;
@@ -180,9 +186,10 @@ RbtNode* Rbt::GetPredecessor(int k)
 	return nullptr;
 }
 
-RbtNode* Rbt::GetMin()
+template <class Key>
+RbtNode<Key>* RedBlackTree<Key>::GetMin()
 {
-	RbtNode* node = root;
+	Node* node = root;
 
 	while (node->left)
 		node = node->left;
@@ -190,9 +197,10 @@ RbtNode* Rbt::GetMin()
 	return node;
 }
 
-RbtNode* Rbt::GetMax()
+template <typename Key>
+RbtNode<Key>* RedBlackTree<Key>::GetMax()
 {
-	RbtNode* node = root;
+	Node* node = root;
 
 	while (node->right)
 		node = node->right;
@@ -200,14 +208,15 @@ RbtNode* Rbt::GetMax()
 	return node;
 }
 
-void Rbt::Delete(int k)
+template <typename Key>
+void RedBlackTree<Key>::Delete(Key k) // this is a huge function..
 {
-	RbtNode* rm = Search(k);
+	Node* rm = Search(k);
 
 	if (!rm)
 		return;
 
-	RbtNode* succ = nullptr;
+	Node* succ = nullptr;
 
 	if (!rm->left && !rm->right) // leaf case
 	{
@@ -267,7 +276,7 @@ void Rbt::Delete(int k)
 		succ->color = D_BLACK;
 	}
 
-	RbtNode* sib = nullptr;
+	Node* sib = nullptr;
 
 	while (succ != root && succ->color == D_BLACK)
 	{
@@ -330,9 +339,10 @@ void Rbt::Delete(int k)
 	delete rm;
 }
 
-RbtNode* Rbt::NewNode(RbtNode* p, int k)
+template <typename Key>
+RbtNode<Key>* RedBlackTree<Key>::NewNode(Node* p, Key k)
 {
-	RbtNode* node = new RbtNode(k);
+	Node* node = new Node(k);
 
 	if (root)
 	{
@@ -347,11 +357,12 @@ RbtNode* Rbt::NewNode(RbtNode* p, int k)
 	return node;
 }
 
-void Rbt::Rotate(RbtNode* n)
+template <typename Key>
+void RedBlackTree<Key>::Rotate(Node* n)
 {
     if (n->ParentIsLeftChild() && !n->IsLeftChild()) // LR
     {
-        RbtNode* l = n->left;
+        Node* l = n->left;
 
         n->left = n->parent;
         n->parent = n->left->parent;
@@ -363,7 +374,7 @@ void Rbt::Rotate(RbtNode* n)
     }
     else if (!n->ParentIsLeftChild() && n->IsLeftChild()) // RL
     {
-        RbtNode* r = n->right;
+        Node* r = n->right;
 
         n->right = n->parent;
         n->parent = n->right->parent;
@@ -375,7 +386,7 @@ void Rbt::Rotate(RbtNode* n)
     }
     else if (n->ParentIsLeftChild() && n->IsLeftChild()) // LL
     {
-        RbtNode* temp = n->parent->right;
+        Node* temp = n->parent->right;
 
         if (n->parent->parent == root)
             root = n->parent;
@@ -398,7 +409,7 @@ void Rbt::Rotate(RbtNode* n)
     }
     else if (!n->ParentIsLeftChild() && !n->IsLeftChild()) // RR
     {
-        RbtNode* temp = n->parent->left;
+        Node* temp = n->parent->left;
 
         if (n->parent->parent == root)
             root = n->parent;
@@ -423,8 +434,9 @@ void Rbt::Rotate(RbtNode* n)
     if (n == root)
         n->color = BLACK;
 }
-    
-int* Rbt::InOrder()
+
+template <typename Key>
+int* RedBlackTree<Key>::InOrder()
 {
 	if (!root)
 		return nullptr;
@@ -451,7 +463,8 @@ int* Rbt::InOrder()
 	return arr;
 }
 
-void Rbt::InOrderRecur(RbtNode* n, int arr[], int& i)
+template <typename Key>
+void RedBlackTree<Key>::InOrderRecur(Node* n, Key arr[], int& i)
 {
 	arr[i] = n->key;
 	i++;
@@ -463,7 +476,8 @@ void Rbt::InOrderRecur(RbtNode* n, int arr[], int& i)
 		InOrderRecur(n->right, arr, i);
 }
 
-int Rbt::CountRecur(RbtNode* n)
+template <typename Key>
+int RedBlackTree<Key>::CountRecur(Node* n)
 {
 	if (!n)
 		return 0;
@@ -474,7 +488,8 @@ int Rbt::CountRecur(RbtNode* n)
 	return total;
 }
 
-void Rbt::DeleteRecur(RbtNode* n)
+template <typename Key>
+void RedBlackTree<Key>::DeleteRecur(Node* n)
 {
 	if (n->left)
 		DeleteRecur(n->left);
@@ -485,7 +500,8 @@ void Rbt::DeleteRecur(RbtNode* n)
 	delete n;
 }
 
-bool Rbt::IsRed(RbtNode* n)
+template <typename Key>
+bool RedBlackTree<Key>::IsRed(Node* n)
 {
 	if (!n)
 		return false;
@@ -493,7 +509,8 @@ bool Rbt::IsRed(RbtNode* n)
 	return n->color == RED;	
 }
 
-void Rbt::SwapColor(RbtNode* n)
+template <typename Key>
+void RedBlackTree<Key>::SwapColor(Node* n)
 {
 	if (!n)
 		return;

@@ -5,18 +5,18 @@
 #include <vld.h>
 #include "red-black-tree.h"
 
-void Print(Rbt& t, RbtNode* n);
-void PrintKeys(Rbt& tree);
-void PrintWarnings(Rbt& t, RbtNode* n);
+//void Print(RedBlackTree& t, Node* n);
+//void PrintKeys(RedBlackTree& tree);
+//void PrintWarnings(RedBlackTree& t, Node* n);
 
 int test_rbt()
 {
 	
 	// use to verify structure: https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
 	// 
-    RbtNode* node{};
+    RbtNode<int>* node{};
 
-    Rbt a;  // insert some keys out of order
+    RedBlackTree<int> a;  // insert some keys out of order
 
     a.Insert(9);
     a.Insert(32);
@@ -287,7 +287,7 @@ int test_rbt()
 	delete keys;
 
 
-    Rbt b;
+    RedBlackTree<int> b;
 
     b.Insert(40);
     b.Delete(40); //case where root is only node
@@ -506,7 +506,7 @@ int test_rbt()
     assert(node->color == RED);
 
 
-    Rbt c;
+    RedBlackTree<int> c;
 
     for (int i = 1; i < 21; i++) // keys 1-20 in order
         c.Insert(i);
@@ -570,132 +570,132 @@ int test_rbt()
 
 	return 0;
 }
-
-void PrintKeys(Rbt& tree) // for debugging
-{
-
-    int* keys = tree.InOrder();
-    for (int i = 0; i < tree.GetCount(); i++)
-        std::cout << "\n " << keys[i];
-
-    delete keys;
-}
-
-void PrintWarnings(Rbt& tree, RbtNode* node) // for debugging
-{
-    if (node == tree.GetRoot() && node->color != BLACK)
-        std::cout << "\nWARNING! non-black root node on node " << node;
-
-    if (node->color == BLACK && node->color == RED)
-
-        std::cout << "\nWARNING! too many colors on node " << node;
-    if (node->color != BLACK && node->color != RED)
-
-        std::cout << "\nWARNING! no color on node " << node;
-
-    if (node->color == RED && node->left != nullptr && node->left->color == RED)
-        std::cout << "\nWARNING! red with red child on nodes " << node << " and " << node->left;
-
-    if (node->color == RED && node->right != nullptr && node->right->color == RED)
-        std::cout << "nWARNING! red with red child on nodes " << node << " and " << node->right;
-
-    if (node->left)
-        PrintWarnings(tree, node->left);
-
-    if (node->right)
-        PrintWarnings(tree, node->right);
-}
-
-void Print(Rbt& tree, RbtNode* node) // for debugging
-{
-    if (tree.GetRoot() == nullptr)
-    {
-        std::cout << "\n\n EMPTY TREE";
-        return;
-    }
-        
-
-	std::cout << "\n\n NODE " << node->key;
-
-	if (node->color == RED)
-		std::cout << " red";
-	if (node->color == BLACK)
-		std::cout << " black";
-
-	std::cout << "\n   left ";
-
-	if (node->left != nullptr)
-	{
-		std::cout << node->left->key;
-		if (node->left->color == RED)
-			std::cout << " red";
-		if (node->left->color == BLACK)
-			std::cout << " black";
-	}
-	else
-		std::cout << "null black";
-
-	std::cout << "\n   right ";
-
-	if (node->right != nullptr)
-	{
-		std::cout << node->right->key;
-		if (node->right->color == RED)
-			std::cout << " red";
-		if (node->right->color == BLACK)
-			std::cout << " black";
-	}
-	else
-		std::cout << "null black";
-
-	//std::cout << "\n   uncle ";
-
-	//if (node->GetUncle() != nullptr)
-	//{
-	//	std::cout << node->GetUncle()->key;
-	//	if (node->GetUncle()->color == RED)
-	//		std::cout << " red";
-	//	if (!node->GetUncle()->color == BLACK)
-	//		std::cout << " black";
-	//}
-	//else
-	//	std::cout << "null";
-
-	std::cout << "\n   parent ";
-
-	if (node->parent != nullptr)
-	{
-		std::cout << node->parent->key;
-		if (node->parent->color == RED)
-			std::cout << " red";
-		if (node->parent->color == BLACK)
-			std::cout << " black";
-	}
-	else
-		std::cout << "null black";
-
-	//std::cout << "\n   g-parent ";
-
-	//if (node->GetGrandParent() != nullptr)
-	//{
-	//	std::cout << node->GetGrandParent()->key;
-	//	if (node->GetGrandParent()->color == RED)
-	//		std::cout << " red";
-	//	if (!node->GetGrandParent()->color == BLACK)
-	//		std::cout << " black";
-	//}
-	//else
-	//	std::cout << "null";
-
-	if (node->left)
-	{
-		Print(tree, node->left);
-	}
-
-	if (node->right)
-	{
-		Print(tree, node->right);
-	}
-
-}
+//
+//void PrintKeys(RedBlackTree& tree) // for debugging
+//{
+//
+//    int* keys = tree.InOrder();
+//    for (int i = 0; i < tree.GetCount(); i++)
+//        std::cout << "\n " << keys[i];
+//
+//    delete keys;
+//}
+//
+//void PrintWarnings(RedBlackTree& tree, Node* node) // for debugging
+//{
+//    if (node == tree.GetRoot() && node->color != BLACK)
+//        std::cout << "\nWARNING! non-black root node on node " << node;
+//
+//    if (node->color == BLACK && node->color == RED)
+//
+//        std::cout << "\nWARNING! too many colors on node " << node;
+//    if (node->color != BLACK && node->color != RED)
+//
+//        std::cout << "\nWARNING! no color on node " << node;
+//
+//    if (node->color == RED && node->left != nullptr && node->left->color == RED)
+//        std::cout << "\nWARNING! red with red child on nodes " << node << " and " << node->left;
+//
+//    if (node->color == RED && node->right != nullptr && node->right->color == RED)
+//        std::cout << "nWARNING! red with red child on nodes " << node << " and " << node->right;
+//
+//    if (node->left)
+//        PrintWarnings(tree, node->left);
+//
+//    if (node->right)
+//        PrintWarnings(tree, node->right);
+//}
+//
+//void Print(RedBlackTree& tree, Node* node) // for debugging
+//{
+//    if (tree.GetRoot() == nullptr)
+//    {
+//        std::cout << "\n\n EMPTY TREE";
+//        return;
+//    }
+//        
+//
+//	std::cout << "\n\n NODE " << node->key;
+//
+//	if (node->color == RED)
+//		std::cout << " red";
+//	if (node->color == BLACK)
+//		std::cout << " black";
+//
+//	std::cout << "\n   left ";
+//
+//	if (node->left != nullptr)
+//	{
+//		std::cout << node->left->key;
+//		if (node->left->color == RED)
+//			std::cout << " red";
+//		if (node->left->color == BLACK)
+//			std::cout << " black";
+//	}
+//	else
+//		std::cout << "null black";
+//
+//	std::cout << "\n   right ";
+//
+//	if (node->right != nullptr)
+//	{
+//		std::cout << node->right->key;
+//		if (node->right->color == RED)
+//			std::cout << " red";
+//		if (node->right->color == BLACK)
+//			std::cout << " black";
+//	}
+//	else
+//		std::cout << "null black";
+//
+//	//std::cout << "\n   uncle ";
+//
+//	//if (node->GetUncle() != nullptr)
+//	//{
+//	//	std::cout << node->GetUncle()->key;
+//	//	if (node->GetUncle()->color == RED)
+//	//		std::cout << " red";
+//	//	if (!node->GetUncle()->color == BLACK)
+//	//		std::cout << " black";
+//	//}
+//	//else
+//	//	std::cout << "null";
+//
+//	std::cout << "\n   parent ";
+//
+//	if (node->parent != nullptr)
+//	{
+//		std::cout << node->parent->key;
+//		if (node->parent->color == RED)
+//			std::cout << " red";
+//		if (node->parent->color == BLACK)
+//			std::cout << " black";
+//	}
+//	else
+//		std::cout << "null black";
+//
+//	//std::cout << "\n   g-parent ";
+//
+//	//if (node->GetGrandParent() != nullptr)
+//	//{
+//	//	std::cout << node->GetGrandParent()->key;
+//	//	if (node->GetGrandParent()->color == RED)
+//	//		std::cout << " red";
+//	//	if (!node->GetGrandParent()->color == BLACK)
+//	//		std::cout << " black";
+//	//}
+//	//else
+//	//	std::cout << "null";
+//
+//	if (node->left)
+//	{
+//		Print(tree, node->left);
+//	}
+//
+//	if (node->right)
+//	{
+//		Print(tree, node->right);
+//	}
+//
+//}
 

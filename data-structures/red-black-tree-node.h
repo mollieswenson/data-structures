@@ -1,29 +1,27 @@
 #pragma once
 
-#include <iostream>
-#include <cassert>
-
 #include <vld.h>
 
 enum Color { RED, BLACK, D_BLACK };
 
+template <typename Key>
 struct RbtNode
 {
-	friend class Rbt;
+	template <typename Key> friend class RedBlackTree;
 	RbtNode(int k) : key(k) {};
 	~RbtNode() { };
 
-	int key{};
+	Key key{};
 
 	Color color = RED;
 
-	RbtNode* parent{ nullptr };
-	RbtNode* left{ nullptr };
-	RbtNode* right{ nullptr };
+	RbtNode<Key>* parent{ nullptr };
+	RbtNode<Key>* left{ nullptr };
+	RbtNode<Key>* right{ nullptr };
 
 private:
-	RbtNode* GetSibling(); // returns sibling of this node
-	RbtNode* GetUncle(); // returns uncle of this node
+	RbtNode<Key>* GetSibling(); // returns sibling of this node
+	RbtNode<Key>* GetUncle(); // returns uncle of this node
 
 	bool HasRedChild(); // true when red child exists, otherwise false
 	bool HasRedSibling(); // true when red sibling exists, otherwise false
@@ -33,7 +31,8 @@ private:
 	bool IsLeftChild() { return parent && parent->left == this; }; // true when this node is left child
 };
 
-RbtNode* RbtNode::GetSibling()
+template <typename Key>
+RbtNode<Key>* RbtNode<Key>::GetSibling()
 {
 	if (!this)
 		return nullptr;
@@ -51,7 +50,8 @@ RbtNode* RbtNode::GetSibling()
 	}
 }
 
-RbtNode* RbtNode::GetUncle()
+template <typename Key>
+RbtNode<Key>* RbtNode<Key>::GetUncle()
 {
 	if (parent && parent->parent)
 	{
@@ -65,7 +65,8 @@ RbtNode* RbtNode::GetUncle()
 	return nullptr;
 }
 
-bool RbtNode::HasRedUncle()
+template <typename Key>
+bool RbtNode<Key>::HasRedUncle()
 {
 	if (parent && parent->parent)
 	{
@@ -79,7 +80,8 @@ bool RbtNode::HasRedUncle()
 	return false;
 }
 
-bool RbtNode::HasRedChild()
+template <typename Key>
+bool RbtNode<Key>::HasRedChild()
 {
 	if (left && left->color == RED)
 		return true;
@@ -90,7 +92,8 @@ bool RbtNode::HasRedChild()
 	return false;
 }
 
-bool RbtNode::HasRedSibling()
+template <typename Key>
+bool RbtNode<Key>::HasRedSibling()
 {
 	if (parent)
 	{
